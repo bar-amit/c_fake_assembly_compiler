@@ -1,0 +1,10 @@
+macro_list* get_macros(file_line* file);
+int is_macro(char *line);
+int is_end(char *line);
+int starts_with(char *start, char *str);
+void get_name(char **target, char *line);
+int validate_name(char *name, macro_list *list);
+int is_in_list(char *name, char **list);
+char *get_name_error(char *error, int line_number);
+char *int_to_string(int n, char *str);
+char *get_end_error(char *error, int line_number);
