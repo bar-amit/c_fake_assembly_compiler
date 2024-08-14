@@ -4,34 +4,12 @@
 
 #include "../include/macro_routine.h"
 #include "../include/file_line.h"
-#include "../include/get_macros.h"
 #include "../include/parser.h"
+#include "../include/get_macros.h"
 #include "../include/allocate_memory.h"
 #include "../include/handle_error.h"
 #include "../include/constants.h"
 #include "../include/util.h"
-
-char *registers[] = {"r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7", "r8"};
-char *instractions[] = {".data", ".string", ".entry", ".extern"};
-char *operations[] = 
-    {
-        "mov",
-        "cmp",
-        "add",
-        "sub",
-        "lea",
-        "clr",
-        "not",
-        "inc",
-        "dec",
-        "jmp",
-        "bne",
-        "red",
-        "prn",
-        "jsr",
-        "rts",
-        "stop"
-    };
 
 macro_list* get_macros(file_line* file){
     macro_list* list = allocate_memory(sizeof(macro_list), "get_macros<list>");
