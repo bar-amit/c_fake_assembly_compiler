@@ -5,6 +5,7 @@
 #include "../include/macro_routine.h"
 #include "../include/file_line.h"
 #include "../include/get_macros.h"
+#include "../include/parser.h"
 #include "../include/allocate_memory.h"
 #include "../include/handle_error.h"
 #include "../include/constants.h"
@@ -41,7 +42,7 @@ macro_list* get_macros(file_line* file){
         if(is_macro(file->content)){
             start_line = file->line_number;
             get_name(&name, file->content);
-            if(!validate_name(name, list)){
+            if(!is_preserved(name, list)){
                 printf("name error at %d\n", file->line_number);
                 /*
                 get_name_error(error, file->line_number);
@@ -59,20 +60,6 @@ macro_list* get_macros(file_line* file){
         file = file->next;
     }
     return list;
-}
-
-int validate_name(char *name, macro_list *list){
-    return !(is_in_list(name, instractions)
-        || is_in_list(name, registers)
-        || is_in_list(name, operations)
-        || find_macro(list, name)!=NULL);
-}
-
-int is_in_list(char *name, char *list[]){
-    int i = -1;
-    while(list[++i] != NULL)
-        if(strcmp(name, list[i])==0) return 1;
-    return 0;
 }
 
 void get_name(char **target, char *line){
