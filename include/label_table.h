@@ -1,14 +1,14 @@
 typedef struct numeric_data {
     int values[24];
-    int lenght = 0;
+    int lenght;
 } numeric_data;
 
 typedef struct label {
     char* name;
     int type_code;
     char* string_data;
-    numeric_data* num_data:
-    label* next;
+    struct numeric_data* num_data;
+    struct label* next;
 } label;
 
 typedef struct label_table {
@@ -21,4 +21,6 @@ typedef enum TYPE_CODES {
     STRING,
     ENTRY,
     EXTERN
-}
+} TYPE_CODES;
+
+label* find_label(char* label_name, label_table* table);

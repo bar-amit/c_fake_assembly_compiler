@@ -3,6 +3,7 @@
 #include <ctype.h>
 
 #include "../include/macro_routine.h"
+#include "../include/label_table.h"
 #include "../include/parser.h"
 #include "../include/constants.h"
 #include "../include/allocate_memory.h"
@@ -32,11 +33,12 @@ char *operations[] =
         "stop"
     };
 
-int is_preserved(char *name, macro_list *list){
+int is_preserved(char *name, macro_list *macros, label_table* labels){
     return !(is_register(name)
         || is_operation(name)
         || is_instraction(name)
-        || find_macro(list, name)!=NULL);
+        || find_macro(macros, name)!=NULL
+        || find_label(name, labels));
 }
 
 int is_in_list(char *name, char *list[]){

@@ -4,6 +4,7 @@
 
 #include "../include/macro_routine.h"
 #include "../include/file_line.h"
+#include "../include/label_table.h"
 #include "../include/parser.h"
 #include "../include/get_macros.h"
 #include "../include/allocate_memory.h"
@@ -20,7 +21,7 @@ macro_list* get_macros(file_line* file){
         if(is_macro(file->content)){
             start_line = file->line_number;
             get_name(&name, file->content);
-            if(!is_preserved(name, list)){
+            if(!is_preserved(name, list, NULL)){
                 printf("name error at %d\n", file->line_number);
                 /*
                 get_name_error(error, file->line_number);

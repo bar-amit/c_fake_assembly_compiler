@@ -1,4 +1,4 @@
-int is_preserved(char *name, macro_list *list);
+int is_preserved(char *name, macro_list *macros, label_table *labels);
 int is_operation(char* str);
 int is_instraction(char* str);
 int is_register(char* str);
