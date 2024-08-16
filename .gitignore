@@ -1,6 +1,6 @@
 *.o
 ./core.*
-./.vscode/*
+.vscode/*
 *.as
 *.am
 *.ob
