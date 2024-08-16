@@ -1,10 +1,12 @@
 #include <string.h>
+#include <stdlib.h>
 #include <ctype.h>
 
 #include "../include/macro_routine.h"
 #include "../include/parser.h"
 #include "../include/constants.h"
 #include "../include/allocate_memory.h"
+#include "../include/util.h"
 
 #define MAX_LABEL_NAME_LENGTH 31
 
@@ -78,4 +80,27 @@ char* parse_string_data(char* str){
     data_end = strrchr(str, '\"');
     strncpy(data, data_start, (int)(data_end - data_start));
     return data;
+}
+
+int* parse_numaric_data(char *str, int *values, char *error){
+    int index = 0;
+    char* temp = strtok(str, ",");
+    while(temp != NULL){
+        if(!validate_numaric(temp)){
+            strcpy(error, "Bad data");
+            return values;
+        }
+        values[index++] = atoi(temp);
+        temp = strtok(NULL, ",");
+    }
+    return values;
+}
+
+int validate_numaric(char* str){
+    while(*str != '\0'){
+        if(!isdigit(*str))
+            return 0;
+        str++;
+    }
+    return 1;
 }

@@ -6,3 +6,5 @@ int is_label(char* str);
 int validate_string_data(char* str);
 char* parse_string_data(char* str);
 int is_in_list(char *name, char *list[]);
+int* parse_numaric_data(char *str, int* values, char *error);
+int validate_numaric(char* str);
