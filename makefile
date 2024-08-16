@@ -1,8 +1,8 @@
  CC = gcc
  FLAGS = -ansi -Wall -pedantic -g
 
-compiler: ./compiler.o ./get_macros.o ./macro_routine.o ./file_line.o ./stream.o ./handle_error.o ./allocate_memory.o ./util.o ./make_am_file.o ./parser.o
-	$(CC) -g compiler.o file_line.o stream.o get_macros.o macro_routine.o allocate_memory.o handle_error.o util.o ./make_am_file.o  ./parser.o $(FLAGS) -o $@
+compiler: ./compiler.o ./get_macros.o ./macro_routine.o ./file_line.o ./stream.o ./handle_error.o ./allocate_memory.o ./util.o ./make_am_file.o ./parser.o ./label_table.o
+	$(CC) -g compiler.o file_line.o stream.o get_macros.o macro_routine.o allocate_memory.o handle_error.o util.o ./make_am_file.o ./parser.o ./label_table.o $(FLAGS) -o $@
 
 compiler.o:  ./src/compiler.c
 	$(CC) -c src/compiler.c $(FLAGS) -o $@
@@ -33,6 +33,9 @@ make_am_file.o: ./src/make_am_file.c ./include/make_am_file.h
 
 parser.o: ./src/parser.c ./include/parser.h
 	$(CC) -c ./src/parser.c $(FLAGS) -o $@
+
+label_table.o: ./src/label_table.c ./include/label_table.h
+	$(CC) -c ./src/label_table.c $(FLAGS) -o $@
 
 clean:
 	rm -rf core.* *.o *.am *.ob *.ent *.ext compiler
