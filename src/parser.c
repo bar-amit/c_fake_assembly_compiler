@@ -84,18 +84,18 @@ char* parse_string_data(char* str){
     return data;
 }
 
-int* parse_numaric_data(char *str, int *values, char *error){
-    int index = 0;
+numeric_data* parse_numeric_data(char *str, numeric_data *data, char *error){
     char* temp = strtok(str, ",");
+    data->lenght = 0;
     while(temp != NULL){
         if(!validate_numaric(temp)){
             strcpy(error, "Bad data");
-            return values;
+            return data;
         }
-        values[index++] = atoi(temp);
+        data->values[data->lenght++] = atoi(temp);
         temp = strtok(NULL, ",");
     }
-    return values;
+    return data;
 }
 
 int validate_numaric(char* str){
