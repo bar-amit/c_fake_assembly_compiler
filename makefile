@@ -41,4 +41,4 @@ build:
 	mkdir build
 
 clean:
-	rm -rf core.* *.o *.am *.ob *.ent *.ext compiler
+	rm -rf core.* *.o *.am *.ob *.ent *.ext compiler build
