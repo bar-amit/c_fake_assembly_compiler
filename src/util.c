@@ -2,14 +2,24 @@
 #include<ctype.h>
 #include<stdlib.h>
 
-#include<stdio.h>
-
 #include "../include/util.h"
 #include "../include/constants.h"
 #include "../include/allocate_memory.h"
 
+char* strip_string(char* str){
+    remove_first_space(str);
+    remove_last_space(str);
+    return str;
+}
 
-char* remove_space(char* str){
+char* remove_first_space(char* str){
+    char c = *str;
+    if(isspace(c))
+        *str = 0;
+    return str;
+}
+
+char* remove_last_space(char* str){
     char c = *(str + strlen(str) - 1);
     if(isspace(c))
         *(str + strlen(str) - 1) = 0;

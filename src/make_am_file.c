@@ -18,7 +18,7 @@ file_head* make_am_file(file_head *source_file, char* file_name, macro_list* lis
         if(is_macro(current_input->content) && macro_flag == 0)
             macro_flag = 1;
         else if(macro_flag == 0){
-            remove_space(strcpy(macro_name, current_input->content));
+            remove_last_space(strcpy(macro_name, current_input->content));
             macro_pointer = find_macro(list, macro_name);
             if(macro_pointer==NULL)
                 prepend_line(am_file, copy_line(current_input));

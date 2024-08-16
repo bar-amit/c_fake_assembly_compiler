@@ -42,7 +42,7 @@ macro_list* get_macros(file_line* file){
 
 void get_name(char **target, char *line){
     *target = (char*)allocate_memory(sizeof(char)*MAX_LINE_LENGTH, "get_name");
-    remove_space(line);
+    remove_last_space(line);
     strcpy(*target, (line + strlen(MACRO_START) + 1));
 }
 
