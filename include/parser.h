@@ -16,6 +16,6 @@ file_head* parse_source(file_head* am_file);
 file_line* parse_operation(char* operation, char* orpands, int source_line);
 data_unit* parse_data(char* label_name, char* instraction, char* orpand);
 int get_data_code(char *instraction);
-void parse_entry(entry_table* entries, char* name, char* type, int source_line, int instraction_line);
+void parse_entry(entry_table* entries, char* name, int type_code, int source_line, int instraction_line);
 int get_entry_code(char *instraction);
 int validate_label_name(char* label_name, data_table* labels, macro_list* macros);

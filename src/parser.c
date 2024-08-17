@@ -55,16 +55,18 @@ void parse_line(file_head* ob_output, data_table* labels, entry_table* entries, 
             /* ERROR: label in empty line */
         }
     }
-    word = strtok(NULL, " ");
-    if(is_operation(word)){
-        prepend_line(ob_output, parse_operation(word, strtok(NULL, "\n"), line->line_number));
-    } else if(is_data(word)){
-        prepend_data(labels, parse_data(NULL, word, strtok(NULL, "\n")));
-        /*WARNING: data without label*/
-    } else if(is_entry(word)){
-        parse_entry(entries, strtok(NULL, "\n"), word, line->line_number, -1);
-    } else {
-        /*error*/
+    else {
+        word = strtok(word, " ");
+        if(is_operation(word)){
+            prepend_line(ob_output, parse_operation(word, strtok(NULL, "\n"), line->line_number));
+        } else if(is_data(word)){
+            prepend_data(labels, parse_data(NULL, word, strtok(NULL, "\n")));
+            /*WARNING: data without label*/
+        } else if(is_entry(word)){
+            parse_entry(entries, strtok(NULL, "\n"), get_entry_code(word), line->line_number, -1);
+        } else {
+            /*error*/
+        }
     }
 }
 
@@ -111,8 +113,7 @@ int get_data_code(char *instraction){
         STRING : NUMERIC;
 }
 
-void parse_entry(entry_table* entries, char* name, char* type, int source_line, int instraction_line){
-    int type_code = get_entry_code(type);
+void parse_entry(entry_table* entries, char* name, int type_code, int source_line, int instraction_line){
     entry_label* entry = find_entry(name, entries);
     if(entry==NULL){
         entry = create_entry(name, type_code, source_line, instraction_line, instraction_line == -1);
@@ -173,8 +174,8 @@ int is_label(char* str){
 }
 
 int is_alnum(char *str){
-    while(*(str++) != '\0'){
-        if(!isalnum(*str))
+    while(*(++str) != '\0'){
+        if(isalnum(*str)==0)
             return 0;
     }
     return 1;
