@@ -4,7 +4,8 @@
 
 #include "../include/macro_routine.h"
 #include "../include/file_line.h"
-#include "../include/label_table.h"
+#include "../include/data_table.h"
+#include "../include/entry_table.h"
 #include "../include/parser.h"
 #include "../include/get_macros.h"
 #include "../include/allocate_memory.h"
