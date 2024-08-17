@@ -12,9 +12,12 @@
 #include "../include/handle_error.h"
 #include "../include/allocate_memory.h"
 #include "../include/util.h"
+#include "../include/data_table.h"
+#include "../include/entry_table.h"
+#include "../include/parser.h"
 
 int main(int argc, char** argv){
-    file_head* am_file;
+    file_head* am_file, *ob_file;
     file_head* test_file = allocate_memory(sizeof(file_head), "main<test_file>");
     macro_list* macros = allocate_memory(sizeof(macro_list), "main<macros>");
     macros->head = NULL;
@@ -26,6 +29,8 @@ int main(int argc, char** argv){
         return 1;
     }
     am_file = make_am_file(test_file, "test.am", get_macros(test_file->head));
+    ob_file = parse_source(am_file);
     write_file(am_file, "test.am");
+    write_file(ob_file, "test.ob");
     return 0;
 }
