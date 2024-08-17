@@ -4,5 +4,5 @@
 *.as
 *.am
 *.ob
-compiler
+assembler
 build/
