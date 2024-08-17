@@ -8,6 +8,7 @@ typedef struct file_line {
 
 typedef struct file_head {
     struct file_line *head;
+    int line_count;
 } file_head;
 
 void* allocate_memory_file_line(char* debbug_id);
