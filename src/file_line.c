@@ -42,10 +42,12 @@ file_line* create_line(char* content, int line_number){
 void prepend_line(file_head* file, file_line* line){
     if(file->head == NULL){
         file->head = line;
+        file->line_count = 0;
         return;
     }
     line->next = file->head;
     file->head = line;
+    file->line_count++;
 }
 
 file_head* reverse_file(file_head* file){
