@@ -41,15 +41,8 @@ void parse_line(file_head* ob_output, data_table* labels, entry_table* entries, 
     char *temp = allocate_memory(sizeof(char) * strlen(line->content), "parse_line");
     char *word, *label_name;
     strcpy(temp, line->content);
-    word = strtok(temp, " ");
-    if(is_operation(word)){
-        prepend_line(ob_output, parse_operation(word, strtok(NULL, "\n"), line->line_number));
-    } else if(is_data(word)){
-        prepend_data(labels, parse_data(NULL, word, strtok(NULL, "\n")));
-        /*WARNING: data without label*/
-    } else if(is_entry(word)){
-        parse_entry(entries, strtok(NULL, "\n"), word, line->line_number, -1);
-    } else if(is_label(word)){
+    word = strtok(temp, ":");
+    if(is_label(word)){
         label_name = allocate_memory(strlen(word), "parse_line<label_name>");
         strcpy(label_name, word);
         word = strtok(NULL, " ");
@@ -59,8 +52,17 @@ void parse_line(file_head* ob_output, data_table* labels, entry_table* entries, 
             prepend_line(ob_output, parse_operation(word, strtok(NULL, "\n"), line->line_number));
             parse_entry(entries, label_name, ENTRY, line->line_number, ob_output->line_count);
         } else {
-            /*error*/
+            /* ERROR: label in empty line */
         }
+    }
+    word = strtok(NULL, " ");
+    if(is_operation(word)){
+        prepend_line(ob_output, parse_operation(word, strtok(NULL, "\n"), line->line_number));
+    } else if(is_data(word)){
+        prepend_data(labels, parse_data(NULL, word, strtok(NULL, "\n")));
+        /*WARNING: data without label*/
+    } else if(is_entry(word)){
+        parse_entry(entries, strtok(NULL, "\n"), word, line->line_number, -1);
     } else {
         /*error*/
     }
@@ -165,9 +167,17 @@ int is_register(char* str){
 }
 
 int is_label(char* str){
-    if(*(str+strlen(str)) == ':')
+    if(isalpha(*str) && is_alnum(str))
         return 1;
     return 0;
+}
+
+int is_alnum(char *str){
+    while(*(str++) != '\0'){
+        if(!isalnum(*str))
+            return 0;
+    }
+    return 1;
 }
 
 int is_entry(char* str){

@@ -3,6 +3,7 @@ int is_operation(char* str);
 int is_instraction(char* str);
 int is_register(char* str);
 int is_label(char* str);
+int is_alnum(char *str);
 int is_entry(char* str);
 int is_data(char* str);
 int validate_string_data(char* str);
