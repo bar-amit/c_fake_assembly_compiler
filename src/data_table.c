@@ -8,9 +8,11 @@
 
 data_unit* create_data(char* name, int type){
     data_unit* new_label = allocate_memory(sizeof(data_unit), "get_label<new_label>");
-    new_label->name = allocate_memory(sizeof(char) * strlen(name), "get_label<name>");
-    strcpy(new_label->name, name);
-    new_label->type_code = type;
+    if(name != NULL){
+        new_label->name = allocate_memory(sizeof(char) * strlen(name), "get_label<name>");
+        strcpy(new_label->name, name);
+        new_label->type_code = type;
+    }
     return new_label;
 }
 
