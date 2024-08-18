@@ -47,7 +47,7 @@ char *clean_whitespace(char *str){
     if(space_flag==1 && j>0)
         j--;
     tmp[j] = '\n';
-    tmp[j+1] = 0;
+    tmp[j+1] = '\0';
     strcpy(str, tmp);
     free(tmp);
     return str;
