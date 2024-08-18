@@ -16,14 +16,16 @@ data_unit* create_data(char* name, int type){
     return new_label;
 }
 
-void prepend_data(data_table* table, data_unit* l){
+void prepend_data(data_table* table, data_unit* data){
+    if(data==NULL)
+        return;
     if(table->head == NULL){
-        table->head = l;
+        table->head = data;
         table->data_count = 1;
         return;
     }
-    l->next = table->head;
-    table->head = l;
+    data->next = table->head;
+    table->head = data;
     table->data_count++;
 }
 

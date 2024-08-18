@@ -1,6 +1,6 @@
 typedef struct numeric_data {
     int values[24];
-    int lenght;
+    int length;
 } numeric_data;
 
 typedef struct data_unit {
@@ -24,4 +24,4 @@ typedef enum TYPE_CODES {
 
 data_unit* find_data(char* label_name, data_table* table);
 data_unit* create_data(char* name, int type);
-void prepend_data(data_table* table, data_unit* l);
+void prepend_data(data_table* table, data_unit* data);
