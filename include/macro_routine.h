@@ -4,6 +4,7 @@ typedef struct macro_routine {
     char *name;
     int start_line;
     int end_line;
+    int is_used;
     struct macro_routine *next;
 } macro_routine;
 
