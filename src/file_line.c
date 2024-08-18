@@ -42,7 +42,7 @@ file_line* create_line(char* content, int line_number){
 void prepend_line(file_head* file, file_line* line){
     if(file->head == NULL){
         file->head = line;
-        file->line_count = 0;
+        file->line_count = 1;
         return;
     }
     line->next = file->head;
@@ -63,11 +63,12 @@ file_head* reverse_file(file_head* file){
 }
 
 file_head* read_file(file_head *file, char* file_name){
-    int line_index = 1;
+    int line_index = 0;
     FILE *file_pointer = NULL;
     char *line = allocate_memory(MAX_LINE_LENGTH, "read_file<line>");
     file_pointer = read_stream(file_pointer, file_name);
     while((line = fgets(line, MAX_LINE_LENGTH, file_pointer))){
+        line_index++;
         clean_whitespace(line);
         if(check_empty(line) || check_comment(line))
             continue;
