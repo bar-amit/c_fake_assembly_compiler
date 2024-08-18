@@ -13,31 +13,34 @@
 #include "../include/constants.h"
 #include "../include/util.h"
 
-macro_list* get_macros(file_line* file){
+macro_list* get_macros(file_head* source_file, file_head* errors, file_head* warnings){
     macro_list* list = allocate_memory(sizeof(macro_list), "get_macros<list>");
+    file_line *current_line = source_file->head;
     int start_line, end_line;
-    char *name, error[100];
-    while (file != NULL)
+    char *name;
+    while (current_line != NULL)
     {
-        if(is_macro(file->content)){
-            start_line = file->line_number;
-            get_name(&name, file->content);
-            if(!is_preserved(name, list, NULL)){
-                printf("name error at %d\n", file->line_number);
-                /*
-                get_name_error(error, file->line_number);
-                handle_error("get_macros<validate_name>", error); */
+        if(is_macro(current_line->content)){
+            start_line = current_line->line_number;
+            get_name(&name, current_line->content);
+            if(is_preserved(name, list, NULL)){
+                handle_message(errors, "macro name is already taken", start_line);
+            } else if (strchr(name, ' ')!=NULL){
+                handle_message(errors, "macro name can't have a space", start_line);
             }
-            while (!is_end((file = file->next)->content))
+            while (!is_end((current_line = current_line->next)->content))
             {
-                if(file == NULL){
-                    handle_error("get_macros<no_end>", get_end_error(error, start_line));
+                if(current_line == NULL){
+                    handle_message(errors, "macro without ending", start_line);
                 }
             }
-            end_line = file->line_number;
+            end_line = current_line->line_number;
+            if(start_line-end_line == 1){
+                handle_message(warnings, "empty macro", start_line);
+            }
             prepend_macro(list, name, start_line, end_line);
         }
-        file = file->next;
+        current_line = current_line->next;
     }
     return list;
 }
@@ -58,25 +61,4 @@ int is_end(char *line){
 
 int starts_with(char *start, char *str){
     return strncmp(start, str, strlen(start))==0 ? 1 : 0;
-}
-
-char *int_to_string(int n, char *str){
-    *str = (char)(n + '0');
-    *(str+1) = '\n';
-    *(str+2) = '\0';
-    return str;
-}
-
-char *get_name_error(char *error, int line_number){
-    char *line = allocate_memory(sizeof(char)*3, "get_name_error");
-    error = "Bad macro name at line ";
-    error = strcat(error, int_to_string(line_number, line));
-    return error;
-}
-
-char *get_end_error(char *error, int line_number){
-    char *line = allocate_memory(sizeof(char)*3, "get_name_error");
-    error = "Missing end of macro starting from line ";
-    error = strcat(error, int_to_string(line_number, line));
-    return error;
 }
