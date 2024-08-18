@@ -22,6 +22,7 @@ macro_routine* get_macro(char* name, int start_line, int end_line){
     strcpy(macro->name, name);
     macro->start_line = start_line;
     macro->end_line = end_line;
+    macro->is_used = 0;
     macro->next = NULL;
     return macro;
 }
