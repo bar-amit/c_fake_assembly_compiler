@@ -32,7 +32,7 @@ file_line* find_line(file_line* line_list, int line_number){
 
 file_line* create_line(char* content, int line_number){
     file_line* line = allocate_memory(sizeof(file_line), "get_line<line>");
-    line->content = allocate_memory(sizeof(char)*strlen(content), "get_line<content>");
+    line->content = allocate_memory(strlen(content) + 1, "get_line<content>");
     strcpy(line->content, content);
     line->line_number = line_number;
     line->next = NULL;

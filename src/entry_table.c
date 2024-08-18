@@ -21,7 +21,7 @@ entry_label* find_entry(char* label_name, entry_table* table){
 
 entry_label* create_entry(char* name, int type, int source_line, int instraction_line, int is_declared){
     entry_label* new_entry = allocate_memory(sizeof(entry_label), "create_entry<new_entry>");
-    new_entry->name = allocate_memory(sizeof(char) * strlen(name), "create_entry<name>");
+    new_entry->name = allocate_memory(strlen(name) + 1, "create_entry<name>");
     strcpy(new_entry->name, name);
     new_entry->type_code = type;
     return new_entry;

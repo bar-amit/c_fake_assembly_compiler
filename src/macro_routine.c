@@ -18,7 +18,7 @@ macro_routine* find_macro(macro_list* list, char* macro_name){
 
 macro_routine* get_macro(char* name, int start_line, int end_line){
     macro_routine* macro = allocate_memory(sizeof(macro_routine), "get_macro<macro>");
-    macro->name = allocate_memory(sizeof(char) * strlen(name), "get_macro<name>");
+    macro->name = allocate_memory(strlen(name) + 1, "get_macro<name>");
     strcpy(macro->name, name);
     macro->start_line = start_line;
     macro->end_line = end_line;

@@ -38,12 +38,12 @@ char *operations[] =
     };
 
 void parse_line(file_head* ob_output, data_table* labels, entry_table* entries, file_line* line){
-    char *temp = allocate_memory(sizeof(char) * strlen(line->content), "parse_line");
+    char *temp = allocate_memory(strlen(line->content) + 1, "parse_line");
     char *word, *label_name;
     strcpy(temp, line->content);
     word = strtok(temp, ":");
     if(is_label(word)){
-        label_name = allocate_memory(strlen(word), "parse_line<label_name>");
+        label_name = allocate_memory(strlen(word) + 1, "parse_line<label_name>");
         strcpy(label_name, word);
         word = strtok(NULL, " ");
         if(is_data(word)){
