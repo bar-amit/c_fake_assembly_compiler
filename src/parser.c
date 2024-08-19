@@ -177,6 +177,10 @@ int is_register(char* str){
     return is_in_list(str, registers);
 }
 
+int is_indirect_register(char* str){
+    return *str=='*' && is_register(str+1);
+}
+
 int is_label(char* str){
     if(isalpha(*str) && is_alnum(str))
         return 1;
