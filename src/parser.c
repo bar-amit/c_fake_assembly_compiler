@@ -181,6 +181,15 @@ int is_indirect_register(char* str){
     return *str=='*' && is_register(str+1);
 }
 
+int are_registers(char* source_operand, char* destination_operand){
+    return (
+        (is_register(source_operand) ||
+        is_inderect_register(source_operand)) &&
+        (is_register(destination_operand) ||
+        is_inderect_register(destination_operand))
+    );
+}
+
 int is_label(char* str){
     if(isalpha(*str) && is_alnum(str))
         return 1;

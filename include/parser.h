@@ -3,6 +3,7 @@ int is_operation(char* str);
 int is_instraction(char* str);
 int is_register(char* str);
 int is_indirect_register(char* str);
+int are_registers(char* source_operand, char* destination_operand);
 int is_label(char* str);
 int is_alnum(char *str);
 int is_entry(char* str);

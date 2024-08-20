@@ -5,6 +5,7 @@
 #include "../include/data_table.h"
 #include "../include/entry_table.h"
 #include "../include/handle_error.h"
+#include "../include/parser.h"
 
 void make_assembly(
 short* code_image, file_head* ob_file, data_table* data, entry_table* entries, file_head* errors)
@@ -32,33 +33,70 @@ short* code_image, file_head* ob_file, data_table* data, entry_table* entries, f
         }
         word_code += get_operand_code(cursor, DESTINATION);
         code_image[word_counter++] = word_code;
-        code_image[word_counter++] = get_operand_encoding(source_operand, data, entries);
-        code_image[word_counter++] = get_operand_encoding(cursor, data, entries);
+        if(are_registers(source_operand, cursor))
+            code_image[word_counter++] = get_registers_encoding(source_operand, cursor);
+        else {    
+            code_image[word_counter++] = get_operand_encoding(source_operand, SOURCE,data, entries);
+            code_image[word_counter++] = get_operand_encoding(cursor, DESTINATION, data, entries);
+        }
         current = current->next;
     }
 }
 
-short get_operand_encoding(char* source_operand, data_table* data, entry_table* entries){
+short get_registers_encoding(char* source_operand, char* destination_operand){
+    short word = ABSOLUTE;
+    word += get_register_number(source_operand) << SOURCE_REGISTER_CODE_OFFSET;
+    word += get_register_number(destination_operand) << DESTINATION_REGISTER_CODE_OFFSET;
+    return word;
+}
+
+short get_register_encoding(char* register, int position){
+    short word = ABSOLUTE;
+    word += get_register_number(register) << position ?
+        SOURCE_REGISTER_CODE_OFFSET : DESTINATION_REGISTER_CODE_OFFSET;
+    return word;
+}
+
+short get_register_number(char* register){
+    if(*register=='*')
+        return (short)(*(register+2)-'0');
+    return (short)(*(register+1)-'0')
+}
+
+short get_label_encoding(operand){
+    short word = RELOCATABLE;
+    //todo
+    return word;
+}
+
+short get_immediate_encoding(char* operand){
+    short word = ABSOLUTE;
+    if(*(operand+1)=='-')
+        return word+= (short)(-(*(operand+2) - '0')) << DESTINATION_OPERAND_CODE_OFFSET;
+    else if(*(operand+1)=='+')
+        return word+= (short)(*(operand+2) - '0') << DESTINATION_OPERAND_CODE_OFFSET;
+    return word+= (short)(*(operand+1) - '0') << DESTINATION_OPERAND_CODE_OFFSET;
+}
+
+short get_operand_encoding(char* operand, int position, data_table* data, entry_table* entries){
     short word;
-    if(is_label(source_operand))
-        return get_label_encoding(source_operand, data, entries);
-    if(is_register(source_operand))
-        word = DIRECT_REGISTER;
-    if()
+    if(is_label(operand))
+        return get_label_encoding(operand, position, data, entries);
+    if(is_register(operand) || is_inddirect_register(operand))
+        return get_register_encoding(operand, position);
+    return get_immediate_encoding(operand, position);
 }
 
 short get_operand_code(char* operand, int operand_position){
-    short operand_code;
-    if(is_register()){
-        operand_code = DIRECT_REGISTER;
-    } else if(is_indirect_register()){
-        operand_code = INDIRECT_REGISTER;
-    } else if(is_label()){
-        operand_code = DIRECT_ADDRESSING;
-    } else {
-        operand_code = IMMEDIATE_ADDRESSING;
-    }
-    return operand_code << OPERAND_CODE_OFFSET << operand_position * OPERAND_CODE_LENGTH;
+    short operand_code = 1;
+    if(is_register(operand))
+        operand_code << DIRECT_REGISTER;
+    else if(is_indirect_register(operand))
+        operand_code << INDIRECT_REGISTER;
+    else if(is_label(operand))
+        operand_code << DIRECT_ADDRESSING;
+    return operand_code << operand_position ?
+        SOURCE_OPERAND_CODE_OFFSET : DESTINATION_OPERAND_CODE_OFFSET;
 }
 
 short get_operation_code(char* operation, file_head* errors, int source_line){
