@@ -1,46 +1,57 @@
 #include <string.h>
 
-#include "../include/assembler.h"
 #include "../include/file_line.h"
+#include "../include/macro_routine.h"
 #include "../include/data_table.h"
 #include "../include/entry_table.h"
+#include "../include/assembler.h"
 #include "../include/handle_error.h"
 #include "../include/parser.h"
 
 void make_assembly(
 short* code_image, file_head* ob_file, data_table* data, entry_table* entries, file_head* errors)
 {
-    int word_counter = 0;
-    short word_code;
+    int word_counter = 0, data_start_address = ob_file->line_count - 1 + MEMORY_ADDRESS_START;
     file_line* current = ob_file->head;
-    char* cursor, source_operand[MAX_LABEL_NAME_LENGTH];
+    char* cursor, first_operand[MAX_LABEL_NAME_LENGTH], operation_name[3];
     while(current!=NULL){
-        word_code = ABSOLUTE;
         cursor = strtok(current->content, " ");
-        word_code += get_operation_code(cursor, errors, current->line_number);
+        strcpy(operation_name, cursor);
         cursor = strtok(NULL, " ");
-        if(cursor==NULL){
-            code_image[word_counter++] = word_code;
-            continue;
-        }
-        word_code += get_operand_code(cursor, SOURCE);
-        strcpy(source_operand, cursor);
+        strcpy(first_operand, cursor);
         cursor = strtok(NULL, " ");
-        if(cursor==NULL){
-            code_image[word_counter++] = word_code;
-            code_image[word_counter++] = get_operand_encoding(source_operand, data, entries);
-            continue;
+        code_image[word_counter++] = get_instraction_encoding(operation_name, first_operand, cursor, errors, current->line_number);
+        if(are_registers(first_operand, cursor))
+            code_image[word_counter++] = get_registers_encoding(first_operand, cursor);
+        else if(first_operand!=NULL && cursor!=NULL){
+            code_image[word_counter++] =
+                get_operand_encoding(first_operand, SOURCE_OPERAND, data, entries, data_start_address);
+            code_image[word_counter++] =
+                get_operand_encoding(cursor, DESTINATION_OPERAND, data, entries, data_start_address);
         }
-        word_code += get_operand_code(cursor, DESTINATION);
-        code_image[word_counter++] = word_code;
-        if(are_registers(source_operand, cursor))
-            code_image[word_counter++] = get_registers_encoding(source_operand, cursor);
-        else {    
-            code_image[word_counter++] = get_operand_encoding(source_operand, SOURCE,data, entries);
-            code_image[word_counter++] = get_operand_encoding(cursor, DESTINATION, data, entries);
+        else if(first_operand!=NULL){
+            code_image[word_counter++] =
+                get_operand_encoding(first_operand, DESTINATION_OPERAND, data, entries, data_start_address);
         }
         current = current->next;
     }
+}
+
+short get_instraction_encoding(
+    char* operation, char* first_operand, char* second_operand, file_head* errors, int source_line)
+{
+    short word = get_operation_code(operation);
+    if(first_operand!=NULL && second_operand!=NULL){
+        is_address_method_allowed(word, SOURCE_OPERAND, get_operand_address_method(first_operand), errors, source_line);
+        is_address_method_allowed(word, DESTINATION_OPERAND, get_operand_address_method(second_operand), errors, source_line);
+    }
+    else if(first_operand!=NULL)
+        is_address_method_allowed(word, DESTINATION_OPERAND, get_operand_address_method(first_operand), errors, source_line);
+    else
+        is_address_method_allowed(word, NONE_OPERAND, NONE_ADDRESS_METHOD, errors, source_line);
+    word = word << OPERATION_CODE_OFFSET;
+    word += ABSOLUTE;
+    return word;
 }
 
 short get_registers_encoding(char* source_operand, char* destination_operand){
@@ -50,22 +61,39 @@ short get_registers_encoding(char* source_operand, char* destination_operand){
     return word;
 }
 
-short get_register_encoding(char* register, int position){
+short get_register_encoding(char* register_name, int position){
     short word = ABSOLUTE;
-    word += get_register_number(register) << position ?
-        SOURCE_REGISTER_CODE_OFFSET : DESTINATION_REGISTER_CODE_OFFSET;
+    word += get_register_number(register_name) << (position ?
+        SOURCE_REGISTER_CODE_OFFSET : DESTINATION_REGISTER_CODE_OFFSET);
     return word;
 }
 
-short get_register_number(char* register){
-    if(*register=='*')
-        return (short)(*(register+2)-'0');
-    return (short)(*(register+1)-'0')
+short get_register_number(char* register_name){
+    if(*register_name=='*')
+        return (short)(*(register_name+2)-'0');
+    return (short)(*(register_name+1)-'0');
 }
 
-short get_label_encoding(operand){
+short get_label_encoding(char* operand, data_table* data, entry_table* entries, int data_start_address){
+    data_unit* data_label;
+    data_label = find_data(operand, data);
+    if(data_label!=NULL)
+        return get_data_encoding(data_label, data_start_address);
+    return get_entry_encoding(find_entry(operand ,entries));
+}
+
+short get_data_encoding(data_unit* data_label, int data_start_address){
     short word = RELOCATABLE;
-    //todo
+    word +=
+        (short)(data_start_address+data_label->data_count) << DESTINATION_OPERAND_CODE_OFFSET;
+    return word;
+}
+
+short get_entry_encoding(entry_label* entry){
+    short word = RELOCATABLE;
+    if (entry->type_code == EXTERN)
+        return (short)EXTERNAL;
+    word += (short)(entry->instraction_line + MEMORY_ADDRESS_START) >> DESTINATION_OPERAND_CODE_OFFSET;
     return word;
 }
 
@@ -78,63 +106,61 @@ short get_immediate_encoding(char* operand){
     return word+= (short)(*(operand+1) - '0') << DESTINATION_OPERAND_CODE_OFFSET;
 }
 
-short get_operand_encoding(char* operand, int position, data_table* data, entry_table* entries){
-    short word;
+short get_operand_encoding(
+    char* operand, int position, data_table* data, entry_table* entries, int data_start_address)
+{
     if(is_label(operand))
-        return get_label_encoding(operand, position, data, entries);
-    if(is_register(operand) || is_inddirect_register(operand))
+        return get_label_encoding(operand, data, entries, data_start_address);
+    if(is_register(operand) || is_indirect_register(operand))
         return get_register_encoding(operand, position);
-    return get_immediate_encoding(operand, position);
+    return get_immediate_encoding(operand);
 }
 
-short get_operand_code(char* operand, int operand_position){
-    short operand_code = 1;
+short get_operand_address_method(char* operand){
     if(is_register(operand))
-        operand_code << DIRECT_REGISTER;
+        return DIRECT_REGISTER;
     else if(is_indirect_register(operand))
-        operand_code << INDIRECT_REGISTER;
+        return INDIRECT_REGISTER;
     else if(is_label(operand))
-        operand_code << DIRECT_ADDRESSING;
-    return operand_code << operand_position ?
-        SOURCE_OPERAND_CODE_OFFSET : DESTINATION_OPERAND_CODE_OFFSET;
+        return DIRECT_ADDRESSING;
+    return IMMEDIATE_ADDRESSING;
 }
 
-short get_operation_code(char* operation, file_head* errors, int source_line){
+short get_operation_code(char* operation){
     if(strcmp(operation, "mov")){
-        return MOV << OPERATION_CODE_OFFSET;
+        return MOV;
     } else if(strcmp(operation, "cmp")){
-        return CMP << OPERATION_CODE_OFFSET;
+        return CMP;
     } else if(strcmp(operation, "add")){
-        return ADD << OPERATION_CODE_OFFSET;
+        return ADD;
     } else if(strcmp(operation, "sub")){
-        return SUB << OPERATION_CODE_OFFSET;
+        return SUB;
     } else if(strcmp(operation, "lea")){
-        return LEA << OPERATION_CODE_OFFSET;
+        return LEA;
     } else if(strcmp(operation, "clr")){
-        return CLR << OPERATION_CODE_OFFSET;
+        return CLR;
     } else if(strcmp(operation, "not")){
-        return NOT << OPERATION_CODE_OFFSET;
+        return NOT;
     } else if(strcmp(operation, "inc")){
-        return INC << OPERATION_CODE_OFFSET;
+        return INC;
     } else if(strcmp(operation, "dec")){
-        return DEC << OPERATION_CODE_OFFSET;
+        return DEC;
     } else if(strcmp(operation, "jmp")){
-        return JMP << OPERATION_CODE_OFFSET;
+        return JMP;
     } else if(strcmp(operation, "bne")){
-        return BNE << OPERATION_CODE_OFFSET;
+        return BNE;
     } else if(strcmp(operation, "red")){
-        return RED << OPERATION_CODE_OFFSET;
+        return RED;
     } else if(strcmp(operation, "prn")){
-        return PRN << OPERATION_CODE_OFFSET;
+        return PRN;
     } else if(strcmp(operation, "jsr")){
-        return JSR << OPERATION_CODE_OFFSET;
+        return JSR;
     } else if(strcmp(operation, "rts")){
-        return RTS << OPERATION_CODE_OFFSET;
+        return RTS;
     } else if(strcmp(operation, "stop")){
-        return STOP << OPERATION_CODE_OFFSET;
+        return STOP;
     }
-    handle_message(errors, "bad operation name", source_line)
-    return 0;
+    return -1;
 }
 
 int get_orpands_amount(int operation_code){
@@ -161,19 +187,21 @@ int get_orpands_amount(int operation_code){
     return 0;
 }
 
-int is_address_method_allowed(int operation_code, int orpand_code, int address_method){
-    int orpand_amount = get_orpands_amount(operation_code);
-    if((orpand_code==SOURCE && orpand_amount!=2) || orpand_amount==0){
-        return 0;
+void is_address_method_allowed(
+    int operation_code, int operand_position, int address_method, file_head* errors, int source_line)
+{
+    int operand_amount = get_orpands_amount(operation_code);
+    if(operand_amount==0 && operand_position!=NONE_OPERAND)
+        handle_message(errors, "too many operands (expected 0)", source_line);
+    if(operand_position==SOURCE_OPERAND){
+        if(operand_amount!=2)
+            handle_message(errors, "too many operands (expected 1)", source_line);
+        if(address_method!=DIRECT_ADDRESSING && operation_code==LEA)
+            handle_message(errors, "illegal addressing method (expected direct address)", source_line);
+    } else {
+        if(address_method==DIRECT_REGISTER && (operation_code==JMP || operation_code==BNE || operation_code==JSR))
+            handle_message(errors, "illegal addressing method (direct register)", source_line);
+        if(address_method==IMMEDIATE_ADDRESSING && !(operation_code==CMP || operation_code==PRN))
+            handle_message(errors, "illegal addressing method (immediate address)", source_line);
     }
-    if(orpand_code==SOURCE){
-        if(address_method!=1 && operation_code==LEA)
-            return 0;
-    } else{
-        if(address_method==3 && (operation_code==JMP || operation_code==BNE || operation_code==JSR))
-            return 0;
-        if(address_method==0 && !(operation_code==CMP || operation_code==PRN))
-            return 0;
-    }
-    return 1;
 }

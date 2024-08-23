@@ -7,6 +7,7 @@ typedef struct data_unit {
     char* name;
     int type_code;
     int source_line;
+    int data_count;
     char* string_data;
     struct numeric_data* num_data;
     struct data_unit* next;

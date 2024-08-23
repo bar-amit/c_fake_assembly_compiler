@@ -21,12 +21,17 @@ void prepend_data(data_table* table, data_unit* data){
         return;
     if(table->head == NULL){
         table->head = data;
-        table->data_count = 1;
+        table->data_count = 0;
+        data->data_count = table->data_count;
         return;
     }
+    data->data_count = table->data_count;
     data->next = table->head;
     table->head = data;
-    table->data_count++;
+    if(data->type_code == NUMERIC)
+        table->data_count += data->num_data->length;
+    else
+        table->data_count += strlen(data->string_data)+1;
 }
 
 data_unit* find_data(char* label_name, data_table* table){
@@ -34,4 +39,16 @@ data_unit* find_data(char* label_name, data_table* table){
     while(temp!=NULL && strcmp(temp->name, label_name)!=0)
         temp = temp->next;
     return temp;
+}
+
+data_table* reverse_data(data_table* file){
+    data_unit *next = NULL, *prev = NULL, *head = file->head;
+    while(head != NULL){
+        next = head->next;
+        head->next = prev;
+        prev = head;
+        head = next;
+    }
+    file->head = prev;
+    return file;
 }

@@ -184,9 +184,9 @@ int is_indirect_register(char* str){
 int are_registers(char* source_operand, char* destination_operand){
     return (
         (is_register(source_operand) ||
-        is_inderect_register(source_operand)) &&
+        is_indirect_register(source_operand)) &&
         (is_register(destination_operand) ||
-        is_inderect_register(destination_operand))
+        is_indirect_register(destination_operand))
     );
 }
 

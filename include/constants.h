@@ -6,5 +6,6 @@
 #define COMMENT_MARKER ';'
 #define MACRO_START "macr"
 #define MACRO_END "endmacr"
+#define MEMORY_ADDRESS_START 100
 
 #endif

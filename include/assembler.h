@@ -18,18 +18,24 @@ typedef enum OPERATION_CODES {
 } OPERATION_CODES;
 
 typedef enum ADDRESSING_CODE {
-    IMMEDIATE_ADDRESSING = 0,
+    NONE_ADDRESS_METHOD = -1,
+    IMMEDIATE_ADDRESSING,
     DIRECT_ADDRESSING,
     INDIRECT_REGISTER,
     DIRECT_REGISTER
 } ADDRESSING_CODE;
 
 typedef enum ENCODING_TYPE {
-    NONE = 0,
-    EXTERNAL,
+    EXTERNAL = 0,
     RELOCATABLE,
     ABSOLUTE
-}
+} ENCODING_TYPE;
+
+typedef enum OPERAND_POSITION {
+    NONE_OPERAND = -1,
+    DESTINATION_OPERAND,
+    SOURCE_OPERAND
+} OPERAND_POSITION;
 
 /* OFFSET OF BITS IN A WORD, RIGHT TO LEFT */
 #define OPERATION_CODE_OFFSET 11
@@ -38,23 +44,29 @@ typedef enum ENCODING_TYPE {
 #define SOURCE_REGISTER_CODE_OFFSET 6
 #define DESTINATION_REGISTER_CODE_OFFSET 3
 
-typedef enum ORPAND_POSITION {
-    DESTINATION = 0,
-    SOURCE
-} ORPAND_POSITION;
-
-int get_operation_code(char* operation);
-void make_assembly(
-    short* code_image, file_head* ob_file,
+void make_assembly(short* code_image,
+    file_head* ob_file, data_table* data,
+    entry_table* entries, file_head* errors);
+short get_instraction_encoding(char* operation,
+    char* first_operand, char* second_operand,
+    file_head* errors, int source_line);
+short get_registers_encoding(char* source_operand,
+    char* destination_operand);
+short get_register_encoding(char* register_name, int position);
+short get_register_number(char* register_name);
+short get_label_encoding(char* operand,
     data_table* data, entry_table* entries,
-    file_head* errors);
-short get_registers_encoding(char* source_operand, char* destination_operand);
-short get_register_encoding(char* register, int position);
-short get_register_number(char* register);
-short get_label_encoding(operand);
+    int data_start_address);
+short get_data_encoding(data_unit* data_label,
+    int data_start_address);
+short get_entry_encoding(entry_label* entry);
 short get_immediate_encoding(char* operand);
-short get_operand_encoding(char* operand, int position, data_table* data, entry_table* entries);
-short get_operand_code(char* operand, int operand_position);
-short get_operation_code(char* operation, file_head* errors, int source_line);
+short get_operand_encoding(char* operand,
+    int position, data_table* data,
+    entry_table* entries, int data_start_address);
+short get_operand_address_method(char* operand);
+short get_operation_code(char* operation);
 int get_orpands_amount(int operation_code);
-int is_address_method_allowed(int operation_code, int orpand_code, int address_method);
+void is_address_method_allowed(int operation_code,
+    int operand_position, int address_method,
+    file_head* errors, int source_line);
