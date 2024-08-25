@@ -1,5 +1,5 @@
 typedef struct numeric_data {
-    int values[24];
+    short values[24];
     int length;
 } numeric_data;
 
@@ -26,3 +26,4 @@ typedef enum TYPE_CODES {
 data_unit* find_data(char* label_name, data_table* table);
 data_unit* create_data(char* name, int type);
 void prepend_data(data_table* table, data_unit* data);
+data_table* reverse_data(data_table* file);

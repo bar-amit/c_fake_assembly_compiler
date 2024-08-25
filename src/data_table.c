@@ -7,12 +7,16 @@
 #include "../include/constants.h"
 
 data_unit* create_data(char* name, int type){
-    data_unit* new_label = allocate_memory(sizeof(data_unit), "get_label<new_label>");
+    data_unit* new_label = allocate_memory(sizeof(data_unit));
     if(name != NULL){
-        new_label->name = allocate_memory(strlen(name) + 1, "get_label<name>");
+        new_label->name = allocate_memory(strlen(name) + 1);
         strcpy(new_label->name, name);
-        new_label->type_code = type;
     }
+    else {
+        new_label->name = allocate_memory(1);
+        strcpy(new_label->name, "");
+    }
+    new_label->type_code = type;
     return new_label;
 }
 
@@ -41,14 +45,14 @@ data_unit* find_data(char* label_name, data_table* table){
     return temp;
 }
 
-data_table* reverse_data(data_table* file){
-    data_unit *next = NULL, *prev = NULL, *head = file->head;
+data_table* reverse_data(data_table* data){
+    data_unit *next = NULL, *prev = NULL, *head = data->head;
     while(head != NULL){
         next = head->next;
         head->next = prev;
         prev = head;
         head = next;
     }
-    file->head = prev;
-    return file;
+    data->head = prev;
+    return data;
 }

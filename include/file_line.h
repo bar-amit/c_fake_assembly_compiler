@@ -11,7 +11,7 @@ typedef struct file_head {
     int line_count;
 } file_head;
 
-void* allocate_memory_file_line(char* debbug_id);
+void* allocate_memory_file_line();
 file_line* copy_line(file_line* source);
 file_line* find_line(file_line* line_list, int line_number);
 file_head* read_file(file_head *file, char* file_name);

@@ -9,12 +9,12 @@
 #include "../include/stream.h"
 #include "../include/util.h"
 
-void* allocate_memory_file_line(char* debbug_id){
-    return allocate_memory(sizeof(file_line), debbug_id);
+void* allocate_memory_file_line(){
+    return allocate_memory(sizeof(file_line));
 }
 
 file_line* copy_line(file_line* source){
-    file_line* destination = allocate_memory_file_line("copy_line");
+    file_line* destination = allocate_memory_file_line();
     destination->content = source->content;
     destination->line_number = source->line_number;
     destination->next = NULL;
@@ -31,8 +31,8 @@ file_line* find_line(file_line* line_list, int line_number){
 }
 
 file_line* create_line(char* content, int line_number){
-    file_line* line = allocate_memory(sizeof(file_line), "get_line<line>");
-    line->content = allocate_memory(strlen(content) + 1, "get_line<content>");
+    file_line* line = allocate_memory_file_line();
+    line->content = allocate_memory(strlen(content) + 1);
     strcpy(line->content, content);
     line->line_number = line_number;
     line->next = NULL;
@@ -65,7 +65,7 @@ file_head* reverse_file(file_head* file){
 file_head* read_file(file_head *file, char* file_name){
     int line_index = 0;
     FILE *file_pointer = NULL;
-    char *line = allocate_memory(MAX_LINE_LENGTH, "read_file<line>");
+    char *line = allocate_memory(MAX_LINE_LENGTH);
     file_pointer = read_stream(file_pointer, file_name);
     while((line = fgets(line, MAX_LINE_LENGTH, file_pointer))){
         line_index++;

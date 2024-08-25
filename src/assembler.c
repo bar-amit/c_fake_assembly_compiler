@@ -7,18 +7,20 @@
 #include "../include/assembler.h"
 #include "../include/handle_error.h"
 #include "../include/parser.h"
+#include "../include/util.h"
 
 void make_assembly(
 short* code_image, file_head* ob_file, data_table* data, entry_table* entries, file_head* errors)
 {
     int word_counter = 0, data_start_address = ob_file->line_count - 1 + MEMORY_ADDRESS_START;
     file_line* current = ob_file->head;
-    char* cursor, first_operand[MAX_LABEL_NAME_LENGTH], operation_name[3];
+    char* cursor, first_operand[MAX_LABEL_NAME_LENGTH], operation_name[4];
     while(current!=NULL){
-        cursor = strtok(current->content, " ");
+        cursor = strtok(remove_last_space(current->content), " ");
         strcpy(operation_name, cursor);
         cursor = strtok(NULL, " ");
-        strcpy(first_operand, cursor);
+        if(cursor!=NULL)
+            strcpy(first_operand, cursor);
         cursor = strtok(NULL, " ");
         code_image[word_counter++] = get_instraction_encoding(operation_name, first_operand, cursor, errors, current->line_number);
         if(are_registers(first_operand, cursor))
@@ -40,17 +42,26 @@ short* code_image, file_head* ob_file, data_table* data, entry_table* entries, f
 short get_instraction_encoding(
     char* operation, char* first_operand, char* second_operand, file_head* errors, int source_line)
 {
-    short word = get_operation_code(operation);
+    short word = get_operation_code(operation), source_address_method, destination_address_method;
+    source_address_method = destination_address_method = NONE_ADDRESS_METHOD;
     if(first_operand!=NULL && second_operand!=NULL){
-        is_address_method_allowed(word, SOURCE_OPERAND, get_operand_address_method(first_operand), errors, source_line);
-        is_address_method_allowed(word, DESTINATION_OPERAND, get_operand_address_method(second_operand), errors, source_line);
+        source_address_method = get_operand_address_method(first_operand);
+        destination_address_method = get_operand_address_method(second_operand);
+        is_address_method_allowed(word, SOURCE_OPERAND, source_address_method, errors, source_line);
+        is_address_method_allowed(word, DESTINATION_OPERAND, destination_address_method, errors, source_line);
     }
-    else if(first_operand!=NULL)
-        is_address_method_allowed(word, DESTINATION_OPERAND, get_operand_address_method(first_operand), errors, source_line);
+    else if(first_operand!=NULL && *first_operand!='\0'){
+        destination_address_method = get_operand_address_method(first_operand);
+        is_address_method_allowed(word, DESTINATION_OPERAND, destination_address_method, errors, source_line);
+    }
     else
         is_address_method_allowed(word, NONE_OPERAND, NONE_ADDRESS_METHOD, errors, source_line);
     word = word << OPERATION_CODE_OFFSET;
     word += ABSOLUTE;
+    if(destination_address_method!=NONE_ADDRESS_METHOD)
+        word += destination_address_method << DESTINATION_OPERAND_CODE_OFFSET;
+    if(source_address_method!=NONE_ADDRESS_METHOD)
+        word += source_address_method << SOURCE_OPERAND_CODE_OFFSET;
     return word;
 }
 
@@ -91,6 +102,8 @@ short get_data_encoding(data_unit* data_label, int data_start_address){
 
 short get_entry_encoding(entry_label* entry){
     short word = RELOCATABLE;
+    if(entry==NULL)
+        return 0;
     if (entry->type_code == EXTERN)
         return (short)EXTERNAL;
     word += (short)(entry->instraction_line + MEMORY_ADDRESS_START) >> DESTINATION_OPERAND_CODE_OFFSET;
@@ -109,10 +122,10 @@ short get_immediate_encoding(char* operand){
 short get_operand_encoding(
     char* operand, int position, data_table* data, entry_table* entries, int data_start_address)
 {
-    if(is_label(operand))
-        return get_label_encoding(operand, data, entries, data_start_address);
     if(is_register(operand) || is_indirect_register(operand))
         return get_register_encoding(operand, position);
+    if(is_label(operand))
+        return get_label_encoding(operand, data, entries, data_start_address);
     return get_immediate_encoding(operand);
 }
 
@@ -127,37 +140,37 @@ short get_operand_address_method(char* operand){
 }
 
 short get_operation_code(char* operation){
-    if(strcmp(operation, "mov")){
+    if(strcmp(operation, "mov")==0){
         return MOV;
-    } else if(strcmp(operation, "cmp")){
+    } else if(strcmp(operation, "cmp")==0){
         return CMP;
-    } else if(strcmp(operation, "add")){
+    } else if(strcmp(operation, "add")==0){
         return ADD;
-    } else if(strcmp(operation, "sub")){
+    } else if(strcmp(operation, "sub")==0){
         return SUB;
-    } else if(strcmp(operation, "lea")){
+    } else if(strcmp(operation, "lea")==0){
         return LEA;
-    } else if(strcmp(operation, "clr")){
+    } else if(strcmp(operation, "clr")==0){
         return CLR;
-    } else if(strcmp(operation, "not")){
+    } else if(strcmp(operation, "not")==0){
         return NOT;
-    } else if(strcmp(operation, "inc")){
+    } else if(strcmp(operation, "inc")==0){
         return INC;
-    } else if(strcmp(operation, "dec")){
+    } else if(strcmp(operation, "dec")==0){
         return DEC;
-    } else if(strcmp(operation, "jmp")){
+    } else if(strcmp(operation, "jmp")==0){
         return JMP;
-    } else if(strcmp(operation, "bne")){
+    } else if(strcmp(operation, "bne")==0){
         return BNE;
-    } else if(strcmp(operation, "red")){
+    } else if(strcmp(operation, "red")==0){
         return RED;
-    } else if(strcmp(operation, "prn")){
+    } else if(strcmp(operation, "prn")==0){
         return PRN;
-    } else if(strcmp(operation, "jsr")){
+    } else if(strcmp(operation, "jsr")==0){
         return JSR;
-    } else if(strcmp(operation, "rts")){
+    } else if(strcmp(operation, "rts")==0){
         return RTS;
-    } else if(strcmp(operation, "stop")){
+    } else if(strcmp(operation, "stop")==0){
         return STOP;
     }
     return -1;

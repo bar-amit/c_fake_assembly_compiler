@@ -14,7 +14,7 @@
 #include "../include/util.h"
 
 macro_list* get_macros(file_head* source_file, file_head* errors, file_head* warnings){
-    macro_list* list = allocate_memory(sizeof(macro_list), "get_macros<list>");
+    macro_list* list = allocate_memory(sizeof(macro_list));
     file_line *current_line = source_file->head;
     int start_line, end_line;
     char *name;
@@ -46,7 +46,7 @@ macro_list* get_macros(file_head* source_file, file_head* errors, file_head* war
 }
 
 void get_name(char **target, char *line){
-    *target = (char*)allocate_memory(sizeof(char)*MAX_LINE_LENGTH, "get_name");
+    *target = (char*)allocate_memory(sizeof(char)*MAX_LINE_LENGTH);
     remove_last_space(line);
     strcpy(*target, (line + strlen(MACRO_START) + 1));
 }

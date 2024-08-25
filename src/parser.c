@@ -39,61 +39,68 @@ char *operations[] =
     };
 
 void parse_line(
-file_head* ob_output, data_table* labels, entry_table* entries,
-file_line* line, file_head* errors, file_head* warnings)
+    file_head* ob_output, data_table* data, entry_table* entries,
+    file_line* line, file_head* errors, file_head* warnings)
 {
-    char *temp = allocate_memory(strlen(line->content) + 1, "parse_line");
+    char *temp = allocate_memory(strlen(line->content) + 1);
     char *word, *label_name;
     strcpy(temp, line->content);
-    word = strtok(temp, ":");
+    word = get_next_token(temp, ":");
     if(is_label(word)){
-        label_name = allocate_memory(strlen(word) + 1, "parse_line<label_name>");
+        label_name = allocate_memory(strlen(word) + 1);
         strcpy(label_name, word);
-        word = strtok(NULL, ": ");
+        word = get_next_token(NULL, ": ");
         if(is_data(word)){
-            prepend_data(labels, parse_data(label_name, word, strtok(NULL, ""), line->line_number, errors));
+            prepend_data(data, parse_data(label_name, word, get_next_token(NULL, ""), line->line_number, errors));
         } else if(is_operation(word)){
-            prepend_line(ob_output, parse_operation(word, strtok(NULL, ""), line->line_number, errors));
+            prepend_line(ob_output, parse_operation(word, get_next_token(NULL, ""), line->line_number, errors));
             parse_entry(entries, label_name, ENTRY, line->line_number, ob_output->line_count, errors);
         } else if(is_entry(word)){
             handle_message(warnings, "label for a declaration line", line->line_number);
-            parse_entry(entries, strtok(NULL, "\n"), get_entry_code(word), line->line_number, -1, errors);
+            parse_entry(entries, get_next_token(NULL, ""), get_entry_code(word), line->line_number, -1, errors);
         } else {
             handle_message(errors, "label of an empty line", line->line_number);
         }
     } else {
-        word = strtok(word, " ");
+        word = get_next_token(word, " ");
         if(is_operation(word)){
-            prepend_line(ob_output, parse_operation(word, strtok(NULL, ""), line->line_number, errors));
+            prepend_line(ob_output, parse_operation(word, get_next_token(NULL, ""), line->line_number, errors));
         } else if(is_data(word)){
-            prepend_data(labels, parse_data(NULL, word, strtok(NULL, ""), line->line_number, errors));
+            prepend_data(data, parse_data(NULL, word, get_next_token(NULL, ""), line->line_number, errors));
             handle_message(warnings, "data instraction without a label", line->line_number);
         } else if(is_entry(word)){
-            parse_entry(entries, strtok(NULL, "\n"), get_entry_code(word), line->line_number, -1, errors);
+            parse_entry(entries, get_next_token(NULL, ""), get_entry_code(word), line->line_number, -1, errors);
         } else {
             handle_message(errors, "can't parse code", line->line_number);
         }
     }
 }
 
-file_head* parse_source(file_head* am_file, file_head* errors, file_head* warnings){
+file_head* parse_source(file_head* am_file, file_head* ob_output, data_table* data, entry_table* entries,
+    file_head* errors, file_head* warnings)
+{
     file_line* current_input = am_file->head;
-    file_head* ob_output = allocate_memory(sizeof(file_head), "parse_source<ob_output>");
-    data_table* labels = allocate_memory(sizeof(data_table), "parse_source<data_table>");
-    entry_table* entries = allocate_memory(sizeof(entry_table), "parse_source<entries>");
     while(current_input != NULL){
-        parse_line(ob_output, labels, entries, current_input, errors, warnings);
+        parse_line(ob_output, data, entries, current_input, errors, warnings);
         current_input = current_input->next;
     }
+    reverse_data(data);
     return reverse_file(ob_output);
 }
 
 file_line* parse_operation(char* operation, char* orpands, int source_line, file_head* errors){
-    char* temp = allocate_memory(MAX_LINE_LENGTH, "parse_operation");
+    char* temp = allocate_memory(MAX_LINE_LENGTH), *str;
     strcpy(temp, operation);
-    strcat(temp, " ");
-    strcat(temp, strtok(orpands, ","));
-    strcat(temp, strtok(NULL, ","));
+    str = strtok(orpands, ",");
+    if(str!=NULL){
+        strcat(temp, " ");
+        strcat(temp, str);
+    }
+    str = strtok(NULL, ",");
+    if(str!=NULL){
+        strcat(temp, " ");
+        strcat(temp, str);
+    }
     if(strtok(NULL, ",")!=NULL)
         handle_message(errors, "too many orpands", source_line);
     return create_line(temp, source_line);
@@ -151,11 +158,11 @@ int get_entry_code(char *instraction){
 }
 
 int is_preserved(char *name, macro_list *macros, data_table* labels){
-    return !(is_register(name)
+    return is_register(name)
         || is_operation(name)
         || is_instraction(name)
         || find_macro(macros, name)!=NULL
-        || find_data(name, labels));
+        || find_data(name, labels)!=NULL;
 }
 
 int is_in_list(char *name, char *list[]){
@@ -166,23 +173,31 @@ int is_in_list(char *name, char *list[]){
 }
 
 int is_operation(char* str){
+    if(str==NULL)
+        return 0;
     return is_in_list(str, operations);
 }
 
 int is_instraction(char* str){
+    if(str==NULL)
+        return 0;
     return is_in_list(str, instractions);
 }
 
 int is_register(char* str){
+    if(str==NULL)
+        return 0;
     return is_in_list(str, registers);
 }
 
 int is_indirect_register(char* str){
+    if(str==NULL)
+        return 0;
     return *str=='*' && is_register(str+1);
 }
 
 int are_registers(char* source_operand, char* destination_operand){
-    return (
+    return (source_operand!=NULL && destination_operand!=NULL &&
         (is_register(source_operand) ||
         is_indirect_register(source_operand)) &&
         (is_register(destination_operand) ||
@@ -191,6 +206,8 @@ int are_registers(char* source_operand, char* destination_operand){
 }
 
 int is_label(char* str){
+    if(str==NULL)
+        return 0;
     if(isalpha(*str) && is_alnum(str))
         return 1;
     return 0;
@@ -205,12 +222,16 @@ int is_alnum(char *str){
 }
 
 int is_entry(char* str){
+    if(str==NULL)
+        return 0;
     if(strcmp(str, ".entry")==0 || strcmp(str, ".extern")==0)
         return 1;
     return 0;
 }
 
 int is_data(char* str){
+    if(str==NULL)
+        return 0;
     return strcmp(str, ".string")==0 || strcmp(str, ".data")==0;
 }
 
@@ -218,13 +239,13 @@ int validate_string_data(char* str){
     char *data_start, *data_end;
     data_start = strchr(str, '\"');
     data_end = strrchr(str, '\"');
-    if(data_start==NULL || data_start==data_end || *(data_end+1)!='\n')
+    if(data_start==NULL || data_start==data_end || *(data_end+1)!='\0')
         return 0;
     return 1;
 }
 
 char* parse_string_data(char* str){
-    char *data = allocate_memory(sizeof(char)*MAX_LINE_LENGTH, "parse_string_data");
+    char *data = allocate_memory(sizeof(char)*MAX_LINE_LENGTH);
     char *data_start, *data_end;
     data_start = strchr(str, '\"');
     data_end = strrchr(str, '\"');
@@ -233,7 +254,7 @@ char* parse_string_data(char* str){
 }
 
 numeric_data* parse_numeric_data(char *str){
-    numeric_data *data = allocate_memory(sizeof(numeric_data), "parse_numeric_data");
+    numeric_data *data = allocate_memory(sizeof(numeric_data));
     char* temp = strtok(str, ",");
     data->length = 0;
     while(temp != NULL){
@@ -245,7 +266,7 @@ numeric_data* parse_numeric_data(char *str){
 
 int validate_numeric_data(char* str){
     int space_flag = 0, num_flag = 0, comma_flag = 0;
-    while(*str!='\n'){
+    while(*str!='\0'){
         if(*str==','){
             if(comma_flag)
                 return 0;
