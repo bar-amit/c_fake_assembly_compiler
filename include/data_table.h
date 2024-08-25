@@ -23,7 +23,34 @@ typedef enum TYPE_CODES {
     STRING
 } TYPE_CODES;
 
+/**
+ * Search data by label name.
+ * 
+ * @param label_name The label to seach for.
+ * @param table The data tabel head.
+ */
 data_unit* find_data(char* label_name, data_table* table);
+
+/**
+ * Creates new data item of data_unit struct.
+ * 
+ * @param name Label name.
+ * @param type Either NUMERIC or STRING type. 
+ */
 data_unit* create_data(char* name, int type);
+
+/**
+ * Prepends data to table.
+ * 
+ * @param table The data table.
+ * @param data The data to prepend.
+ */
 void prepend_data(data_table* table, data_unit* data);
-data_table* reverse_data(data_table* file);
+
+/**
+ * Reverse data table. Done at the end of the pass to preserve the original order
+ * of labels in the assembly code.
+ * 
+ * @param table The data table to reverse.
+ */
+data_table* reverse_data(data_table* table);

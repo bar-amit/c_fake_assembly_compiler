@@ -1,8 +1,8 @@
  CC = gcc
  FLAGS = -ansi -Wall -pedantic -g
 
-assembler: main.o get_macros.o macro_routine.o file_line.o stream.o handle_error.o allocate_memory.o util.o make_am_file.o parser.o data_table.o entry_table.o assembler.o
-	$(CC) -g build/main.o build/file_line.o build/stream.o build/get_macros.o build/macro_routine.o build/allocate_memory.o build/handle_error.o build/util.o build/make_am_file.o build/parser.o build/data_table.o build/entry_table.o build/assembler.o $(FLAGS) -o $@
+assembler: main.o get_macros.o macro_routine.o file_line.o stream.o handle_error.o allocate_memory.o util.o make_am_file.o parser.o data_table.o entry_table.o make_ob_file.o
+	$(CC) -g build/main.o build/file_line.o build/stream.o build/get_macros.o build/macro_routine.o build/allocate_memory.o build/handle_error.o build/util.o build/make_am_file.o build/parser.o build/data_table.o build/entry_table.o build/make_ob_file.o $(FLAGS) -o $@
 
 main.o: build src/main.c
 	$(CC) -c src/main.c $(FLAGS) -o build/$@
@@ -40,8 +40,8 @@ data_table.o: build src/data_table.c include/data_table.h
 entry_table.o: build src/entry_table.c include/entry_table.h
 	$(CC) -c src/entry_table.c $(FLAGS) -o build/$@
 
-assembler.o: build src/assembler.c include/assembler.h
-	$(CC) -c src/assembler.c $(FLAGS) -o build/$@
+make_ob_file.o: build src/make_ob_file.c include/make_ob_file.h
+	$(CC) -c src/make_ob_file.c $(FLAGS) -o build/$@
 
 build:
 	mkdir build

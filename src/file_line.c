@@ -67,6 +67,8 @@ file_head* read_file(file_head *file, char* file_name){
     FILE *file_pointer = NULL;
     char *line = allocate_memory(MAX_LINE_LENGTH);
     file_pointer = read_stream(file_pointer, file_name);
+    if(file_pointer==NULL)
+        return NULL;
     while((line = fgets(line, MAX_LINE_LENGTH, file_pointer))){
         line_index++;
         clean_whitespace(line);

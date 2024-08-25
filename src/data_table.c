@@ -45,14 +45,14 @@ data_unit* find_data(char* label_name, data_table* table){
     return temp;
 }
 
-data_table* reverse_data(data_table* data){
-    data_unit *next = NULL, *prev = NULL, *head = data->head;
+data_table* reverse_data(data_table* table){
+    data_unit *next = NULL, *prev = NULL, *head = table->head;
     while(head != NULL){
         next = head->next;
         head->next = prev;
         prev = head;
         head = next;
     }
-    data->head = prev;
-    return data;
+    table->head = prev;
+    return table;
 }

@@ -1,13 +1,43 @@
 #include <string.h>
+#include <stdio.h>
 
 #include "../include/file_line.h"
 #include "../include/macro_routine.h"
 #include "../include/data_table.h"
 #include "../include/entry_table.h"
-#include "../include/assembler.h"
+#include "../include/make_ob_file.h"
+#include "../include/stream.h"
 #include "../include/handle_error.h"
 #include "../include/parser.h"
 #include "../include/util.h"
+
+void write_ob_file(short* code_image, data_table* data, char* file_name){
+    FILE* file_pointer = NULL;
+    data_unit* current_data = data->head;
+    int code_index = -1, data_index = 0, data_counter = MEMORY_ADDRESS_START;
+    file_pointer = write_steam(file_pointer, file_name);
+    while (code_image[++code_index]!=0)
+        {
+            fprintf(file_pointer, "%04d %05o\n", code_index+MEMORY_ADDRESS_START, code_image[code_index]);
+        }
+    data_counter += code_index;
+    while (current_data!=NULL){
+        switch (current_data->type_code)
+        {
+        case STRING:
+            while(*(current_data->string_data+data_index)!='\0')
+                fprintf(file_pointer, "%04d %05o\n", data_counter++, (short)*(current_data->string_data+(data_index++)));
+            fprintf(file_pointer, "%04d %05o\n", data_counter++, (short)0);
+            break;
+        case NUMERIC:
+            while(data_index < current_data->num_data->length)
+                fprintf(file_pointer, "%04d %05o\n", data_counter++, current_data->num_data->values[data_index++]);
+            break;
+        }
+        data_index = 0;
+        current_data = current_data->next;
+    }
+}
 
 void make_assembly(
 short* code_image, file_head* ob_file, data_table* data, entry_table* entries, file_head* errors)
@@ -176,7 +206,7 @@ short get_operation_code(char* operation){
     return -1;
 }
 
-int get_orpands_amount(int operation_code){
+int get_operands_amount(int operation_code){
     switch(operation_code){
     case MOV:
     case CMP:
@@ -203,7 +233,7 @@ int get_orpands_amount(int operation_code){
 void is_address_method_allowed(
     int operation_code, int operand_position, int address_method, file_head* errors, int source_line)
 {
-    int operand_amount = get_orpands_amount(operation_code);
+    int operand_amount = get_operands_amount(operation_code);
     if(operand_amount==0 && operand_position!=NONE_OPERAND)
         handle_message(errors, "too many operands (expected 0)", source_line);
     if(operand_position==SOURCE_OPERAND){

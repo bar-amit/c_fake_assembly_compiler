@@ -9,7 +9,7 @@
 #include "../include/util.h"
 #include "../include/handle_error.h"
 
-file_head* make_am_file(file_head *source_file, char* file_name, macro_list* macros, file_head* warnings){
+file_head* make_am_file(file_head *source_file, macro_list* macros, file_head* warnings){
     file_head* am_file = allocate_memory(sizeof(file_head));
     file_line* current_input = source_file->head;
     macro_routine* macro_pointer = NULL;

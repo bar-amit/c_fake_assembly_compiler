@@ -58,3 +58,11 @@ char *clean_whitespace(char *str){
     free(tmp);
     return str;
 }
+
+char* replace_file_ending(char* file_name, char* ending){
+    char* new_name = allocate_memory(strlen(file_name)), *c;
+    strcpy(new_name, file_name);
+    if((c = strrchr(new_name, '.'))!=NULL)
+        *c = '\0';
+    return strcat(new_name, ending);
+}
