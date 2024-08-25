@@ -4,5 +4,6 @@
 *.as
 *.am
 *.ob
+*.zip
 assembler
 build/
