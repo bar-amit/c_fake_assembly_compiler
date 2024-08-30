@@ -52,9 +52,11 @@ void parse_line(
         word = get_next_token(NULL, ": ");
         if(is_data(word)){
             prepend_data(data, parse_data(label_name, word, get_next_token(NULL, ""), line->line_number, errors));
+            parse_entry(entries, label_name, DATA, line->line_number, data->data_count, errors);
         } else if(is_operation(word)){
-            prepend_line(ob_output, parse_operation(word, get_next_token(NULL, ""), line->line_number, errors));
             parse_entry(entries, label_name, ENTRY, line->line_number, ob_output->line_count, errors);
+            add_instracion(ob_output, word, get_next_token(NULL, ""), line->line_number, errors);
+            count_extra_words(ob_output);
         } else if(is_entry(word)){
             handle_message(warnings, "label for a declaration line", line->line_number);
             parse_entry(entries, get_next_token(NULL, ""), get_entry_code(word), line->line_number, -1, errors);
@@ -64,7 +66,8 @@ void parse_line(
     } else {
         word = get_next_token(word, " ");
         if(is_operation(word)){
-            prepend_line(ob_output, parse_operation(word, get_next_token(NULL, ""), line->line_number, errors));
+            add_instracion(ob_output, word, get_next_token(NULL, ""), line->line_number, errors);
+            count_extra_words(ob_output);
         } else if(is_data(word)){
             prepend_data(data, parse_data(NULL, word, get_next_token(NULL, ""), line->line_number, errors));
             handle_message(warnings, "data instraction without a label", line->line_number);
@@ -84,8 +87,31 @@ file_head* parse_source(file_head* am_file, file_head* ob_output, data_table* da
         parse_line(ob_output, data, entries, current_input, errors, warnings);
         current_input = current_input->next;
     }
+    validate_entries(entries, errors);
     reverse_data(data);
     return reverse_file(ob_output);
+}
+
+void add_instracion(file_head* ob_file, char* operation,
+    char* operands, int source_line, file_head* errors)
+{
+    prepend_line(ob_file, parse_operation(operation, operands, source_line, errors));
+}
+
+void count_extra_words(file_head* ob_file){
+    char* instraction_line = allocate_memory(strlen(ob_file->head->content));
+    char* first_operand, *second_operand;
+    strcpy(instraction_line, ob_file->head->content);
+    strtok(instraction_line, " ");
+    first_operand = strtok(NULL, " ");
+    second_operand = strtok(NULL, " ");
+    if(are_registers(first_operand, second_operand))
+        ob_file->line_count++;
+    else if(first_operand!=NULL && second_operand!=NULL)
+        ob_file->line_count += 2;
+    else if(first_operand!=NULL)
+        ob_file->line_count++;
+    free(instraction_line);
 }
 
 file_line* parse_operation(char* operation, char* orpands, int source_line, file_head* errors){
@@ -137,6 +163,8 @@ void parse_entry(
 entry_table* entries, char* name, int type_code, int source_line, int instraction_line, file_head* errors)
 {
     entry_label* entry = find_entry(name, entries);
+    if(instraction_line!=-1 && type_code!=DATA)
+        instraction_line += MEMORY_ADDRESS_START;
     if(entry==NULL){
         entry = create_entry(name, type_code, source_line, instraction_line, instraction_line == -1);
         prepend_entry(entries, entry);
@@ -144,6 +172,10 @@ entry_table* entries, char* name, int type_code, int source_line, int instractio
     }
     else if((entry->instraction_line>=0 && instraction_line>=0) || (instraction_line<0 && entry->is_declared)){
         handle_message(errors, "redefenition/redeclaration of label", source_line);
+    }
+    if(type_code==DATA){
+        entry->type_code = DATA;
+        entry->is_declared = 1;
     }
     if(instraction_line>=0)
         entry->instraction_line = instraction_line;
@@ -229,6 +261,17 @@ int is_entry(char* str){
     return 0;
 }
 
+int is_immediate(char* str){
+    if(*str++=='#'){
+        while(*str++!='\0'){
+            if(!isdigit(*str))
+                return 0;
+        }
+    } else
+        return 0;
+    return 1;
+}
+
 int is_data(char* str){
     if(str==NULL)
         return 0;
@@ -304,4 +347,13 @@ int validate_label_name(char* label_name, data_table* labels, macro_list* macros
             return 0;
     }
     return 1;
+}
+
+void validate_entries(entry_table* entries, file_head* errors){
+    entry_label* current = entries->head;
+    while(current!=NULL){
+        if(current->type_code==ENTRY && current->is_declared==1 && current->instraction_line==-1)
+            handle_message(errors,"Entry of undefined label", current->source_line);
+        current = current->next;
+    }
 }

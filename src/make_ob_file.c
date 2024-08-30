@@ -14,7 +14,7 @@
 void write_ob_file(short* code_image, data_table* data, char* file_name){
     FILE* file_pointer = NULL;
     data_unit* current_data = data->head;
-    int code_index = -1, data_index = 0, data_counter = MEMORY_ADDRESS_START;
+    int code_index = -1, data_index = 0, data_counter = MEMORY_ADDRESS_START+1;
     file_pointer = write_steam(file_pointer, file_name);
     while (code_image[++code_index]!=0)
         {
@@ -42,10 +42,11 @@ void write_ob_file(short* code_image, data_table* data, char* file_name){
 void make_assembly(
 short* code_image, file_head* ob_file, data_table* data, entry_table* entries, file_head* errors)
 {
-    int word_counter = 0, data_start_address = ob_file->line_count - 1 + MEMORY_ADDRESS_START;
+    int word_counter = 0, data_start_address = ob_file->line_count + MEMORY_ADDRESS_START, current_address;
     file_line* current = ob_file->head;
     char* cursor, first_operand[MAX_LABEL_NAME_LENGTH], operation_name[4];
     while(current!=NULL){
+        current_address = MEMORY_ADDRESS_START + word_counter;
         cursor = strtok(remove_last_space(current->content), " ");
         strcpy(operation_name, cursor);
         cursor = strtok(NULL, " ");
@@ -57,13 +58,13 @@ short* code_image, file_head* ob_file, data_table* data, entry_table* entries, f
             code_image[word_counter++] = get_registers_encoding(first_operand, cursor);
         else if(first_operand!=NULL && cursor!=NULL){
             code_image[word_counter++] =
-                get_operand_encoding(first_operand, SOURCE_OPERAND, data, entries, data_start_address);
+                get_operand_encoding(first_operand, SOURCE_OPERAND, data, entries, data_start_address, current_address);
             code_image[word_counter++] =
-                get_operand_encoding(cursor, DESTINATION_OPERAND, data, entries, data_start_address);
+                get_operand_encoding(cursor, DESTINATION_OPERAND, data, entries, data_start_address, current_address);
         }
         else if(first_operand!=NULL){
             code_image[word_counter++] =
-                get_operand_encoding(first_operand, DESTINATION_OPERAND, data, entries, data_start_address);
+                get_operand_encoding(first_operand, DESTINATION_OPERAND, data, entries, data_start_address, current_address);
         }
         current = current->next;
     }
@@ -115,12 +116,14 @@ short get_register_number(char* register_name){
     return (short)(*(register_name+1)-'0');
 }
 
-short get_label_encoding(char* operand, data_table* data, entry_table* entries, int data_start_address){
+short get_label_encoding(char* operand, data_table* data,
+    entry_table* entries, int data_start_address, int instraction_line)
+{
     data_unit* data_label;
     data_label = find_data(operand, data);
     if(data_label!=NULL)
         return get_data_encoding(data_label, data_start_address);
-    return get_entry_encoding(find_entry(operand ,entries));
+    return get_entry_encoding(find_entry(operand, entries), instraction_line);
 }
 
 short get_data_encoding(data_unit* data_label, int data_start_address){
@@ -130,12 +133,14 @@ short get_data_encoding(data_unit* data_label, int data_start_address){
     return word;
 }
 
-short get_entry_encoding(entry_label* entry){
+short get_entry_encoding(entry_label* entry, int instraction_line){
     short word = RELOCATABLE;
     if(entry==NULL)
         return 0;
-    if (entry->type_code == EXTERN)
+    if (entry->type_code == EXTERN){
+        add_external_use(entry, instraction_line);
         return (short)EXTERNAL;
+    }
     word += (short)(entry->instraction_line + MEMORY_ADDRESS_START) >> DESTINATION_OPERAND_CODE_OFFSET;
     return word;
 }
@@ -149,13 +154,13 @@ short get_immediate_encoding(char* operand){
     return word+= (short)(*(operand+1) - '0') << DESTINATION_OPERAND_CODE_OFFSET;
 }
 
-short get_operand_encoding(
-    char* operand, int position, data_table* data, entry_table* entries, int data_start_address)
+short get_operand_encoding(char* operand, int position,
+    data_table* data, entry_table* entries, int data_start_address, int instraction_line)
 {
     if(is_register(operand) || is_indirect_register(operand))
         return get_register_encoding(operand, position);
     if(is_label(operand))
-        return get_label_encoding(operand, data, entries, data_start_address);
+        return get_label_encoding(operand, data, entries, data_start_address, instraction_line);
     return get_immediate_encoding(operand);
 }
 
@@ -166,7 +171,9 @@ short get_operand_address_method(char* operand){
         return INDIRECT_REGISTER;
     else if(is_label(operand))
         return DIRECT_ADDRESSING;
-    return IMMEDIATE_ADDRESSING;
+    else if(is_immediate(operand))
+        return IMMEDIATE_ADDRESSING;
+    return NONE_ADDRESS_METHOD;
 }
 
 short get_operation_code(char* operation){

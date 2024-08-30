@@ -49,6 +49,11 @@ int is_alnum(char *str);
 int is_entry(char* str);
 
 /**
+ * Checks if a string is an immediate value
+ */
+int is_immediate(char* str);
+
+/**
  * Check if string is a declaration of ".string" or ".data".
  */
 int is_data(char* str);
@@ -135,3 +140,31 @@ int get_entry_code(char *instraction);
  * Validates label name.
  */
 int validate_label_name(char* label_name, data_table* labels, macro_list* macros);
+
+/**
+ * Counts extra words used to encode operands. The line count
+ * in the file_head struct is used to count instraction lines.
+ * 
+ * @param ob_file Link list used as a skeleton for the code image.
+ */
+void count_extra_words(file_head* ob_file);
+
+/**
+ * Adds a new instraction line to the code image skeleton.
+ * 
+ * @param ob_file Stores the code image skeleton.
+ * @param operation Operation name.
+ * @param operands Operands part of instraction line.
+ * @param source_line Line number of instraction in source file. 
+ * @param errors Errors log.
+ */
+void add_instracion(file_head* ob_file, char* operation,
+    char* operands, int source_line, file_head* errors);
+
+/**
+ * Vlidates entries to be in .ent file
+ * 
+ * @param entries Table of entries.
+ * @param errors Errors log.
+ */
+void validate_entries(entry_table* entries, file_head* errors);

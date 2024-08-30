@@ -110,10 +110,11 @@ short get_register_number(char* register_name);
  * @param data Data table.
  * @param entries Table of entries.
  * @param data_start_address Starting address of data in memory.
+ * @param instraction_line Line number where the label is used
  */
 short get_label_encoding(char* operand,
     data_table* data, entry_table* entries,
-    int data_start_address);
+    int data_start_address, int instraction_line);
 
 /**
  * Encodes data label
@@ -128,8 +129,9 @@ short get_data_encoding(data_unit* data_label,
  * Encodes entry address
  * 
  * @param entry Entry item to encode.
+ * @param instraction_line Line number in code image where the label is used
  */
-short get_entry_encoding(entry_label* entry);
+short get_entry_encoding(entry_label* entry, int instraction_line);
 
 /**
  * Encodes an immediate value.
@@ -146,10 +148,12 @@ short get_immediate_encoding(char* operand);
  * @param data Data table.
  * @param entries Entries table.
  * @param data_start_address Starting address of data in memory.
+ * @param instraction_line Line number in code image.
  */
 short get_operand_encoding(char* operand,
     int position, data_table* data,
-    entry_table* entries, int data_start_address);
+    entry_table* entries, int data_start_address,
+    int instraction_line);
 
 /**
  * Encodes the addressing method of an operand
