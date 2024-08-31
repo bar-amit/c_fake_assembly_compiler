@@ -6,8 +6,9 @@
 #include "../include/make_extra_files.h"
 #include "../include/stream.h"
 
-void write_entry_file(entry_table* entries, int data_address_start, char* file_name){
+void write_entry_file(entry_table* entries, data_table* data, char* file_name){
     entry_label* current = entries->head;
+    data_unit* label;
     FILE* file_pointer = NULL;
     while(current!=NULL){
         if(current->is_declared && current->type_code==ENTRY){
@@ -15,8 +16,10 @@ void write_entry_file(entry_table* entries, int data_address_start, char* file_n
                 file_pointer = write_steam(file_pointer, file_name);
             fprintf(file_pointer, "%s %04d\n", current->name, current->instraction_line);
         }
-        if(current->is_declared && current->type_code==DATA)
-            fprintf(file_pointer, "%s %04d\n", current->name, current->instraction_line + data_address_start);
+        if(current->is_declared && current->type_code==DATA){
+            label = find_data(current->name, data);
+            fprintf(file_pointer, "%s %04d\n", current->name, label->data_count + data->data_address_start);
+        }
         current = current->next;
     }
 }

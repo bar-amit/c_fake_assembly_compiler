@@ -89,6 +89,7 @@ file_head* parse_source(file_head* am_file, file_head* ob_output, data_table* da
     }
     validate_entries(entries, errors);
     reverse_data(data);
+    data->data_address_start = ob_output->line_count + MEMORY_ADDRESS_START;
     return reverse_file(ob_output);
 }
 
@@ -273,7 +274,7 @@ int is_immediate(char* str){
     }
     if(digit_flag)
         return 1;
-        return 0;
+    return 0;
 }
 
 int is_data(char* str){

@@ -52,4 +52,4 @@ entry_label* create_entry(char* name, int type, int source_line, int instraction
  * @param entry Entry being used.
  * @param line_number Line number where entry is used. 
  */
-void add_external_use(entry_label* entry, int line_number);
+void add_external_use(entry_label* entry, int position, int operand_amount, int line_number);

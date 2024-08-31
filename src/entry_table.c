@@ -1,6 +1,7 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include "../include/constants.h"
 #include "../include/entry_table.h"
 #include "../include/allocate_memory.h"
 
@@ -33,8 +34,13 @@ entry_label* create_entry(char* name, int type, int source_line, int instraction
     return new_entry;
 }
 
-void add_external_use(entry_label* entry, int line_number){
+void add_external_use(entry_label* entry, int position, int operand_amount, int line_number){
+    int address = line_number;
+    if(position==SOURCE_OPERAND || operand_amount==1)
+        address += 1;
+    else
+        address += 2;
     entry->external_count++;
     entry->used_external = realloc(entry->used_external, sizeof(int) * (entry->external_count));
-    entry->used_external[entry->external_count-1] = line_number;
+    entry->used_external[entry->external_count-1] = address;
 }
