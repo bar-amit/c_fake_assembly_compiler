@@ -2,8 +2,6 @@
 #include <stdlib.h>
 #include <ctype.h>
 
-#include <stdio.h>
-
 #include "../include/macro_routine.h"
 #include "../include/file_line.h"
 #include "../include/data_table.h"
@@ -171,7 +169,8 @@ entry_table* entries, char* name, int type_code, int source_line, int instractio
         prepend_entry(entries, entry);
         return;
     }
-    else if((entry->instraction_line>=0 && instraction_line>=0) || (instraction_line<0 && entry->is_declared)){
+    else if((entry->instraction_line>=0 && instraction_line>=0) || (instraction_line<0 && entry->is_declared) ||
+        type_code==EXTERNAL){
         handle_message(errors, "redefenition/redeclaration of label", source_line);
     }
     if(type_code==DATA){
