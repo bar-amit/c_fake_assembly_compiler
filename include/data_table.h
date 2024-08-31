@@ -1,5 +1,5 @@
 typedef struct numeric_data {
-    short values[24];
+    unsigned short values[24];
     int length;
 } numeric_data;
 
