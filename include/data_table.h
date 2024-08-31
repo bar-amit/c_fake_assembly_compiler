@@ -49,6 +49,13 @@ data_unit* create_data(char* name, int type);
 void prepend_data(data_table* table, data_unit* data);
 
 /**
+ * Returns the length of a data unit in memory.
+ * 
+ * @param data A data unit.
+ */
+int get_data_length(data_unit* data);
+
+/**
  * Reverse data table. Done at the end of the pass to preserve the original order
  * of labels in the assembly code.
  * 

@@ -25,17 +25,23 @@ void prepend_data(data_table* table, data_unit* data){
         return;
     if(table->head == NULL){
         table->head = data;
-        table->data_count = 0;
+        data->data_count = table->data_count = 0;
+    } else {
         data->data_count = table->data_count;
-        return;
+        data->next = table->head;
+        table->head = data;
     }
-    data->data_count = table->data_count;
-    data->next = table->head;
-    table->head = data;
-    if(data->type_code == NUMERIC)
-        table->data_count += data->num_data->length;
-    else
-        table->data_count += strlen(data->string_data)+1;
+    table->data_count += get_data_length(data);
+}
+
+int get_data_length(data_unit* data){
+    switch (data->type_code){
+        case NUMERIC:
+            return data->num_data->length;
+        case STRING:
+            return strlen(data->string_data)+1;
+    }
+    return 0;
 }
 
 data_unit* find_data(char* label_name, data_table* table){
