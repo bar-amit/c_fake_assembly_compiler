@@ -274,7 +274,6 @@ int is_immediate(char* str){
     if(digit_flag)
         return 1;
         return 0;
-    return 1;
 }
 
 int is_data(char* str){
