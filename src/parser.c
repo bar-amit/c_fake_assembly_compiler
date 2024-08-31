@@ -167,7 +167,7 @@ entry_table* entries, char* name, int type_code, int source_line, int instractio
     if(instraction_line!=-1 && type_code!=DATA)
         instraction_line += MEMORY_ADDRESS_START;
     if(entry==NULL){
-        entry = create_entry(name, type_code, source_line, instraction_line, instraction_line == -1);
+        entry = create_entry(name, type_code, source_line, instraction_line, instraction_line==-1);
         prepend_entry(entries, entry);
         return;
     }
