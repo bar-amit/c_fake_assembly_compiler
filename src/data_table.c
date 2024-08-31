@@ -1,19 +1,19 @@
 #include <ctype.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "../include/macro_routine.h"
 #include "../include/data_table.h"
-#include "../include/allocate_memory.h"
 #include "../include/constants.h"
 
 data_unit* create_data(char* name, int type){
-    data_unit* new_label = allocate_memory(sizeof(data_unit));
+    data_unit* new_label = malloc(sizeof(data_unit));
     if(name != NULL){
-        new_label->name = allocate_memory(strlen(name) + 1);
+        new_label->name = malloc(strlen(name) + 1);
         strcpy(new_label->name, name);
     }
     else {
-        new_label->name = allocate_memory(1);
+        new_label->name = malloc(1);
         strcpy(new_label->name, "");
     }
     new_label->type_code = type;

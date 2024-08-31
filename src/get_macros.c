@@ -8,13 +8,12 @@
 #include "../include/entry_table.h"
 #include "../include/parser.h"
 #include "../include/get_macros.h"
-#include "../include/allocate_memory.h"
 #include "../include/handle_error.h"
 #include "../include/constants.h"
 #include "../include/util.h"
 
 macro_list* get_macros(file_head* source_file, file_head* errors, file_head* warnings){
-    macro_list* list = allocate_memory(sizeof(macro_list));
+    macro_list* list = malloc(sizeof(macro_list));
     file_line *current_line = source_file->head;
     int start_line, end_line;
     char *name;
@@ -46,7 +45,7 @@ macro_list* get_macros(file_head* source_file, file_head* errors, file_head* war
 }
 
 void get_name(char **target, char *line){
-    *target = (char*)allocate_memory(sizeof(char)*MAX_LINE_LENGTH);
+    *target = (char*)malloc(sizeof(char)*MAX_LINE_LENGTH);
     remove_last_space(line);
     strcpy(*target, (line + strlen(MACRO_START) + 1));
 }

@@ -4,8 +4,6 @@
 
 #include "../include/util.h"
 #include "../include/constants.h"
-#include "../include/allocate_memory.h"
-
 char* get_next_token(char *str, char* delimiter){
     return strip_string(strtok(str, delimiter));
 }
@@ -34,7 +32,7 @@ char* remove_last_space(char* str){
 
 char *clean_whitespace(char *str){
     int i=0, j=0, space_flag=0;
-    char *tmp = (char *) allocate_memory(sizeof(char) * MAX_LINE_LENGTH);
+    char *tmp = (char *) malloc(sizeof(char) * MAX_LINE_LENGTH);
     while(str[i]){
         if((isspace(str[i])!=0) && space_flag==0){
             space_flag = 1;
@@ -60,7 +58,7 @@ char *clean_whitespace(char *str){
 }
 
 char* replace_file_ending(char* file_name, char* ending){
-    char* new_name = allocate_memory(strlen(file_name)), *c;
+    char* new_name = malloc(strlen(file_name)), *c;
     strcpy(new_name, file_name);
     if((c = strrchr(new_name, '.'))!=NULL)
         *c = '\0';

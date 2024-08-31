@@ -13,7 +13,6 @@
 #include "../include/make_extra_files.h"
 #include "../include/constants.h"
 #include "../include/handle_error.h"
-#include "../include/allocate_memory.h"
 #include "../include/util.h"
 #include "../include/parser.h"
 #include "../include/make_ob_file.h"
@@ -32,13 +31,13 @@ int main(int argc, char** argv){
     }
 
     while(--argc>0){
-        code_scaffold = (file_head*)allocate_memory(sizeof(file_head));
-        data = (data_table*)allocate_memory(sizeof(data_table));
-        entries = (entry_table*)allocate_memory(sizeof(entry_table));
-        source_file = (file_head*)allocate_memory(sizeof(file_head));
-        warnings = (file_head*)allocate_memory(sizeof(file_head));
-        errors = (file_head*)allocate_memory(sizeof(file_head));
-        macros = (macro_list*)allocate_memory(sizeof(macro_list));
+        code_scaffold = (file_head*)malloc(sizeof(file_head));
+        data = (data_table*)malloc(sizeof(data_table));
+        entries = (entry_table*)malloc(sizeof(entry_table));
+        source_file = (file_head*)malloc(sizeof(file_head));
+        warnings = (file_head*)malloc(sizeof(file_head));
+        errors = (file_head*)malloc(sizeof(file_head));
+        macros = (macro_list*)malloc(sizeof(macro_list));
         source_file = read_file(source_file, argv[argc]);
         if(source_file==NULL)
             continue;

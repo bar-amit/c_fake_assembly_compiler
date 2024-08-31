@@ -12,7 +12,7 @@ typedef struct file_head {
 } file_head;
 
 /**
- * Alias for "allocate_memory(sizeof(file_line))".
+ * Alias for "malloc(sizeof(file_line))".
  */
 void* allocate_memory_file_line();
 

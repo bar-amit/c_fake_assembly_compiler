@@ -8,7 +8,6 @@
 #include "../include/entry_table.h"
 #include "../include/parser.h"
 #include "../include/constants.h"
-#include "../include/allocate_memory.h"
 #include "../include/util.h"
 #include "../include/handle_error.h"
 
@@ -40,12 +39,12 @@ void parse_line(
     file_head* ob_output, data_table* data, entry_table* entries,
     file_line* line, file_head* errors, file_head* warnings)
 {
-    char *temp = allocate_memory(strlen(line->content) + 1);
+    char *temp = malloc(strlen(line->content) + 1);
     char *word, *label_name;
     strcpy(temp, line->content);
     word = get_next_token(temp, ":");
     if(is_label(word)){
-        label_name = allocate_memory(strlen(word) + 1);
+        label_name = malloc(strlen(word) + 1);
         strcpy(label_name, word);
         word = get_next_token(NULL, ": ");
         if(is_data(word)){
@@ -98,7 +97,7 @@ void add_instracion(file_head* ob_file, char* operation,
 }
 
 void count_extra_words(file_head* ob_file){
-    char* instraction_line = allocate_memory(strlen(ob_file->head->content));
+    char* instraction_line = malloc(strlen(ob_file->head->content));
     char* first_operand, *second_operand;
     strcpy(instraction_line, ob_file->head->content);
     strtok(instraction_line, " ");
@@ -114,7 +113,7 @@ void count_extra_words(file_head* ob_file){
 }
 
 file_line* parse_operation(char* operation, char* orpands, int source_line, file_head* errors){
-    char* temp = allocate_memory(MAX_LINE_LENGTH), *str;
+    char* temp = malloc(MAX_LINE_LENGTH), *str;
     strcpy(temp, operation);
     str = strtok(orpands, ",");
     if(str!=NULL){
@@ -292,7 +291,7 @@ int validate_string_data(char* str){
 }
 
 char* parse_string_data(char* str){
-    char *data = allocate_memory(sizeof(char)*strlen(str));
+    char *data = malloc(sizeof(char)*strlen(str));
     char *data_start, *data_end;
     data_start = strchr(str, '\"');
     data_end = strrchr(str, '\"');
@@ -301,7 +300,7 @@ char* parse_string_data(char* str){
 }
 
 numeric_data* parse_numeric_data(char *str){
-    numeric_data *data = allocate_memory(sizeof(numeric_data));
+    numeric_data *data = malloc(sizeof(numeric_data));
     char* temp = strtok(str, ",");
     data->length = 0;
     while(temp != NULL){

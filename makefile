@@ -1,8 +1,8 @@
  CC = gcc
  FLAGS = -ansi -Wall -pedantic -g
 
-assembler: main.o get_macros.o macro_routine.o file_line.o stream.o handle_error.o allocate_memory.o util.o make_am_file.o parser.o data_table.o entry_table.o make_ob_file.o make_extra_files.o
-	$(CC) -g build/main.o build/file_line.o build/stream.o build/get_macros.o build/macro_routine.o build/allocate_memory.o build/handle_error.o build/util.o build/make_am_file.o build/parser.o build/data_table.o build/entry_table.o build/make_ob_file.o build/make_extra_files.o $(FLAGS) -o $@
+assembler: main.o get_macros.o macro_routine.o file_line.o stream.o handle_error.o util.o make_am_file.o parser.o data_table.o entry_table.o make_ob_file.o make_extra_files.o
+	$(CC) -g build/main.o build/file_line.o build/stream.o build/get_macros.o build/macro_routine.o build/handle_error.o build/util.o build/make_am_file.o build/parser.o build/data_table.o build/entry_table.o build/make_ob_file.o build/make_extra_files.o $(FLAGS) -o $@
 
 main.o: build src/main.c
 	$(CC) -c src/main.c $(FLAGS) -o build/$@
@@ -21,9 +21,6 @@ stream.o: build src/stream.c include/stream.h
 
 handle_error.o: build src/handle_error.c include/handle_error.h
 	$(CC) -c src/handle_error.c $(FLAGS) -o build/$@
-
-allocate_memory.o: build src/allocate_memory.c include/allocate_memory.h
-	$(CC) -c src/allocate_memory.c $(FLAGS) -o build/$@
 
 util.o: build src/util.c include/util.h
 	$(CC) -c src/util.c $(FLAGS) -o build/$@
