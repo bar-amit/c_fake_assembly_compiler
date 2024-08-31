@@ -151,7 +151,6 @@ unsigned short get_entry_encoding(entry_label* entry, int position, int operand_
 
 unsigned short get_immediate_encoding(char* operand){
     unsigned short word = ABSOLUTE;
-    printf("DBG: $%o$\n", (unsigned short)(32768));
     if(*(operand+1)=='-')
         return word+= ((unsigned short)(-atoi(operand+2)) << DESTINATION_OPERAND_CODE_OFFSET) ^ BIT_MASK;
     else if(*(operand+1)=='+')
