@@ -305,7 +305,8 @@ numeric_data* parse_numeric_data(char *str){
     char* temp = strtok(str, ",");
     data->length = 0;
     while(temp != NULL){
-        data->values[data->length++] = atoi(temp);
+        data->values[data->length++] = atoi(temp) < 0 ?
+            atoi(temp) ^ BIT_MASK : atoi(temp);
         temp = strtok(NULL, ",");
     }
     return data;
