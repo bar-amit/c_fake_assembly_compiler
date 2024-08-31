@@ -262,12 +262,17 @@ int is_entry(char* str){
 }
 
 int is_immediate(char* str){
-    if(*str++=='#'){
-        while(*str++!='\0'){
-            if(!isdigit(*str))
+    int digit_flag = 0;
+    if(*str=='#'){
+        while(*++str!='\0'){
+            if(isdigit(*str))
+                digit_flag = 1;
+            else if(digit_flag || (*str!='-' && *str!='+'))
                 return 0;
         }
-    } else
+    }
+    if(digit_flag)
+        return 1;
         return 0;
     return 1;
 }
