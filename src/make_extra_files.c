@@ -3,7 +3,7 @@
 
 #include "../include/data_table.h"
 #include "../include/entry_table.h"
-#include "../include/make_entry_file.h"
+#include "../include/make_extra_files.h"
 #include "../include/stream.h"
 
 void write_entry_file(entry_table* entries, int data_address_start, char* file_name){

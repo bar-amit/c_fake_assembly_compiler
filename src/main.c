@@ -9,7 +9,7 @@
 #include "../include/get_macros.h"
 #include "../include/make_am_file.h"
 #include "../include/entry_table.h"
-#include "../include/make_entry_file.h"
+#include "../include/make_extra_files.h"
 #include "../include/constants.h"
 #include "../include/handle_error.h"
 #include "../include/allocate_memory.h"
