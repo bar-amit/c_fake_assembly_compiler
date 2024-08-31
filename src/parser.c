@@ -292,11 +292,11 @@ int validate_string_data(char* str){
 }
 
 char* parse_string_data(char* str){
-    char *data = allocate_memory(sizeof(char)*MAX_LINE_LENGTH);
+    char *data = allocate_memory(sizeof(char)*strlen(str));
     char *data_start, *data_end;
     data_start = strchr(str, '\"');
     data_end = strrchr(str, '\"');
-    strncpy(data, data_start + 1, (int)(data_end - data_start));
+    strncpy(data, data_start + 1, (int)(data_end - data_start - 1));
     return data;
 }
 
