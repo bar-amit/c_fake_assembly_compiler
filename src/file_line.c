@@ -4,7 +4,6 @@
 #include <ctype.h>
 
 #include "../include/file_line.h"
-#include "../include/constants.h"
 #include "../include/stream.h"
 #include "../include/util.h"
 

@@ -18,6 +18,8 @@ void write_entry_file(entry_table* entries, data_table* data, char* file_name){
         }
         if(current->is_declared && current->type_code==DATA){
             label = find_data(current->name, data);
+            if(file_pointer==NULL)
+                file_pointer = write_steam(file_pointer, file_name);
             fprintf(file_pointer, "%s %04d\n", current->name, label->data_count + data->data_address_start);
         }
         current = current->next;

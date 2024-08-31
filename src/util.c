@@ -58,7 +58,7 @@ char *clean_whitespace(char *str){
 }
 
 char* replace_file_ending(char* file_name, char* ending){
-    char* new_name = malloc(strlen(file_name)), *c;
+    char* new_name = malloc(strlen(file_name)+strlen(ending)), *c;
     strcpy(new_name, file_name);
     if((c = strrchr(new_name, '.'))!=NULL)
         *c = '\0';

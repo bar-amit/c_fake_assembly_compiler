@@ -67,9 +67,11 @@ unsigned short get_register_number(char* register_name);
  * @param data Data table.
  * @param entries Table of entries.
  * @param instraction_line Line number where the label is used
+ * @param errors Errors log.
+ * @param source_line Number of line in source file.
  */
 unsigned short get_label_encoding(char* operand, int position, int operand_amount,
-    data_table* data, entry_table* entries, int instraction_line);
+    data_table* data, entry_table* entries, int instraction_line, file_head* errors, int source_line);
 
 /**
  * Encodes data label
@@ -106,10 +108,13 @@ unsigned short get_immediate_encoding(char* operand);
  * @param data Data table.
  * @param entries Entries table.
  * @param instraction_line Line number in code image.
+ * @param errors Errors log.
+ * @param source_line Number of line in source file.
  */
 unsigned short get_operand_encoding(char* operand,
     int position, int operand_amount, data_table* data,
-    entry_table* entries, int instraction_line);
+    entry_table* entries, int instraction_line,
+    file_head* errors, int source_line);
 
 /**
  * Encodes the addressing method of an operand
@@ -130,7 +135,7 @@ unsigned short get_operation_code(char* operation);
  * 
  * @param operation_code An operation code.
  */
-int get_operands_amount(int operation_code);
+int get_operand_amount(int operation_code);
 
 /**
  * Checks if a given addressing method is acceptable for a given operation.

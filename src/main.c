@@ -38,7 +38,7 @@ int main(int argc, char** argv){
         warnings = (file_head*)malloc(sizeof(file_head));
         errors = (file_head*)malloc(sizeof(file_head));
         macros = (macro_list*)malloc(sizeof(macro_list));
-        source_file = read_file(source_file, argv[argc]);
+        source_file = read_file(source_file, strcat(argv[argc], ".as"));
         if(source_file==NULL)
             continue;
         macros = get_macros(source_file, errors, warnings);

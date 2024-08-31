@@ -36,11 +36,3 @@ int starts_with(char *start, char *str);
  * @param line Line to get the macro name from.
  */
 void get_name(char **target, char *line);
-
-/**
- * Validates a macro name.
- * 
- * @param name Name to validate.
- * @param list A macro list to look if macro name is free to use.
- */
-int validate_name(char *name, macro_list *list);

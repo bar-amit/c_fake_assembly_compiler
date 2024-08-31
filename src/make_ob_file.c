@@ -62,13 +62,13 @@ unsigned short* code_image, file_head* ob_file, data_table* data, entry_table* e
             code_image[word_counter++] = get_registers_encoding(first_operand, cursor);
         else if(first_operand!=NULL && cursor!=NULL){
             code_image[word_counter++] =
-                get_operand_encoding(first_operand, SOURCE_OPERAND, 2, data, entries, current_address);
+                get_operand_encoding(first_operand, SOURCE_OPERAND, 2, data, entries, current_address, errors, current->line_number);
             code_image[word_counter++] =
-                get_operand_encoding(cursor, DESTINATION_OPERAND, 2, data, entries, current_address);
+                get_operand_encoding(cursor, DESTINATION_OPERAND, 2, data, entries, current_address, errors, current->line_number);
         }
         else if(*first_operand!='\0'){
             code_image[word_counter++] =
-                get_operand_encoding(first_operand, DESTINATION_OPERAND, 1, data, entries, current_address);
+                get_operand_encoding(first_operand, DESTINATION_OPERAND, 1, data, entries, current_address, errors, current->line_number);
         }
         current = current->next;
     }
@@ -121,13 +121,18 @@ unsigned short get_register_number(char* register_name){
 }
 
 unsigned short get_label_encoding(char* operand, int position, int operand_amount, data_table* data,
-    entry_table* entries, int instraction_line)
+    entry_table* entries, int instraction_line, file_head* errors, int source_line)
 {
     data_unit* data_label;
+    entry_label* entry;
     data_label = find_data(operand, data);
     if(data_label!=NULL)
         return get_data_encoding(data_label, data->data_address_start);
-    return get_entry_encoding(find_entry(operand, entries), position, operand_amount, instraction_line);
+    entry = find_entry(operand, entries);
+    if(entry!=NULL)
+        return get_entry_encoding(entry, position, operand_amount, instraction_line);
+    handle_message(errors, "label is used but not defined", source_line);
+    return 0;
 }
 
 unsigned short get_data_encoding(data_unit* data_label, int data_start_address){
@@ -139,8 +144,6 @@ unsigned short get_data_encoding(data_unit* data_label, int data_start_address){
 
 unsigned short get_entry_encoding(entry_label* entry, int position, int operand_amount, int instraction_line){
     unsigned short word = RELOCATABLE;
-    if(entry==NULL)
-        return 0;
     if (entry->type_code == EXTERN){
         add_external_use(entry, position, operand_amount, instraction_line);
         return (unsigned short)EXTERNAL;
@@ -159,12 +162,13 @@ unsigned short get_immediate_encoding(char* operand){
 }
 
 unsigned short get_operand_encoding(char* operand, int position, int operand_amount,
-    data_table* data, entry_table* entries, int instraction_line)
+    data_table* data, entry_table* entries, int instraction_line, file_head* errors,
+    int source_line)
 {
     if(is_register(operand) || is_indirect_register(operand))
         return get_register_encoding(operand, position);
     if(is_label(operand))
-        return get_label_encoding(operand, position, operand_amount, data, entries, instraction_line);
+        return get_label_encoding(operand, position, operand_amount, data, entries, instraction_line, errors, source_line);
     return get_immediate_encoding(operand);
 }
 
@@ -217,7 +221,7 @@ unsigned short get_operation_code(char* operation){
     return -1;
 }
 
-int get_operands_amount(int operation_code){
+int get_operand_amount(int operation_code){
     switch(operation_code){
     case MOV:
     case CMP:
@@ -244,7 +248,7 @@ int get_operands_amount(int operation_code){
 void is_address_method_allowed(
     int operation_code, int operand_position, int address_method, file_head* errors, int source_line)
 {
-    int operand_amount = get_operands_amount(operation_code);
+    int operand_amount = get_operand_amount(operation_code);
     if(operand_amount==0 && operand_position!=NONE_OPERAND)
         handle_message(errors, "too many operands (expected 0)", source_line);
     if(address_method==NONE_ADDRESS_METHOD && operand_position!=NONE_OPERAND)

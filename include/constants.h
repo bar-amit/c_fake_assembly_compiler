@@ -1,7 +1,7 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
-#define MAX_LINE_LENGTH 80
+#define MAX_LINE_LENGTH 81
 #define MAX_LABEL_NAME_LENGTH 31
 #define COMMENT_MARKER ';'
 #define MACRO_START "macr"
