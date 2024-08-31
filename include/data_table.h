@@ -16,6 +16,7 @@ typedef struct data_unit {
 typedef struct data_table {
     data_unit* head;
     int data_count;
+    int data_address_start;
 } data_table;
 
 typedef enum TYPE_CODES {
